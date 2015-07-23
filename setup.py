@@ -15,7 +15,7 @@ setup(
     install_requires=[
         'python-cdb==0.35',
         'nltk==3.0.0',
-        'pymorphy==0.5.6',
+        'pymorphy2==2.0.8',
         'lxml==3.4.4',
         'beautifulsoup4==4.3.2',
     ],

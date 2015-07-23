@@ -29,4 +29,10 @@ class ExactAnalyzer(IAnalyzer):
 
 class SubformsAnalyzer(ExactAnalyzer):
     def equals(self, ph, other):
-        return ph.origin_word == Lexeme.SPECIAL_WORD or (ph.get_all_normal_phorms() & other.get_all_normal_phorms())
+        u"""
+        Порядок следования аргументов важен
+
+        :param ph: placeholder из искомого слова
+        :param other: placeholder из текста
+        """
+        return ph.is_special or (ph.get_all_normal_phorms() & other.get_all_normal_phorms())

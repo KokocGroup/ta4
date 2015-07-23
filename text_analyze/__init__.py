@@ -2,17 +2,9 @@
 from pkg_resources import resource_filename
 
 import nltk
-import pymorphy
+import pymorphy2
 
-filename = resource_filename("text_analyze", "data/pymorphy")
-morph = pymorphy.get_morph(
-    filename,
-    backend='cdb',
-    check_prefixes=False,
-    predict_by_prefix=False,
-    predict_by_suffix=False,
-    handle_EE=True
-)
+morph = pymorphy2.MorphAnalyzer()
 filename = resource_filename("text_analyze", "data/nltk/english.pickle")
 tokenizer = nltk.data.load(filename)
 
