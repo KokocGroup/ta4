@@ -56,7 +56,9 @@ def test_subform_analyzer():
 
 
 def test_new_letter():
-    word = Sentence(u'[новогдняя] [ёлка]')
+    word = u'[новогдняя] [ёлка]'
+    keyword = Sentence(word)
+    assert word == keyword.text
     text = TextHtml(u"купить новогднюю ёлку в москве недорого")
-    analyze_text([word], text, analyzers=[SubformsAnalyzer()])
-    common_check(word, text, [1, 2])
+    analyze_text([keyword], text, analyzers=[SubformsAnalyzer()])
+    common_check(keyword, text, [1, 2])

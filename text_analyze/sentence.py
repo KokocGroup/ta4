@@ -1,9 +1,7 @@
 #! coding: utf-8
-
-
 class Sentence(object):
     def __init__(self, text, placeholders=None):
-        self.text = text.replace(u'ё', u'е').replace(u'Ё', u'Е')
+        self.text = text
         self.place_holders = placeholders or []
         if not self.place_holders:
             from .utils import get_sentences

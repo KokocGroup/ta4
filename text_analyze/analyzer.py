@@ -1,8 +1,4 @@
 #! coding: utf-8
-from .placeholder import Marker
-from .lexeme import Lexeme
-
-
 class IAnalyzer(object):
     def mark(self, keyword, sentence):
         raise NotImplementedError
@@ -19,8 +15,7 @@ class ExactAnalyzer(IAnalyzer):
                     break
             else:
                 while j >= 0:
-                    marker = Marker(keyword, j)
-                    sentence.place_holders[i+j].markers.append(marker)
+                    sentence.place_holders[i+j].add_marker(j, keyword)
                     j -= 1
 
     def equals(self, ph, other):
