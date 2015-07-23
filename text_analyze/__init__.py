@@ -17,5 +17,8 @@ filename = resource_filename("text_analyze", "data/nltk/english.pickle")
 tokenizer = nltk.data.load(filename)
 
 
-class TextAnalyze(object):
-    pass
+def analyze_text(words, text, analyzers=[]):
+    for analyzer in analyzers:
+        for word in words:
+            for sentence in text:
+                analyzer.mark(word, sentence)

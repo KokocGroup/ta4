@@ -14,3 +14,10 @@ def test_html_creation():
     text = TextHtml(html)
     assert len(text.sentences) == 1
     assert text.build_html() == html
+
+
+def test_simple_text_in_html_creation():
+    html = u'Простое предложение. И затем, следующее предложение'
+    text = TextHtml(html)
+    assert len(text.sentences) == 2
+    assert text.build_html() == html

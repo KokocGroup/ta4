@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup, Tag
 
 from lxml.html import diff
 
-from . import morph, tokenizer
+from . import tokenizer
 from .sentence import Sentence
 from .placeholder import PlaceHolder
 
@@ -21,6 +21,10 @@ class Text(object):
     def __init__(self, text):
         self.text = text
         self.sentences = map(Sentence, self.split_into_sentences(self.text))
+
+    def __iter__(self):
+        for sentence in self.sentences:
+            yield sentence
 
     def split_into_sentences(cls, text):
         if not text:
@@ -41,13 +45,6 @@ class Text(object):
         return self.text.encode('utf-8')
 
 
-def markup(text, marker):
-    if marker:
-        return '<span data-type="backlight" style="background: %s">%s</span>' % (marker, text)
-    else:
-        return text
-
-
 def is_token_end(token):
     if SPACE_REGEXP.match(token.trailing_whitespace) or \
        token.trailing_whitespace in (u' ', u'\xa0') or \
@@ -63,7 +60,6 @@ def tokens_generator(tokens):
     length = len(tokens) - 1
 
     for i, token in enumerate(tokens):
-
         result.append(token)
         next_one = None
         if i < length:
@@ -77,11 +73,11 @@ def tokens_generator(tokens):
 
 class TextHtml(Text):
 
-    END_CHRS = u'!,.?'
+    END_CHRS = u'.?!'
 
     def __init__(self, html, ignored_selectors=[]):
         self.bs = BeautifulSoup(self.prepare_html(html), 'html.parser')
-        self.text = self.bs.get_text()
+        self.text = self.bs.get_text()  # TODO нужно ли?
         self.sentences = []
         self.ignored_element_map = {}
         ignored_id = 1

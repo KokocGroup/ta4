@@ -24,7 +24,7 @@ def get_gram_infos(word):
     if word not in gram_infos_cache:
         gram_infos = morph.get_graminfo(word)
         if not gram_infos:
-            gram_infos = [{'lemma': word, 'norm': word, 'speech': 'C'}]
+            gram_infos = [{'lemma': word, 'norm': word, 'speech': 'C', 'class': 'C'}]
 
         for gi in gram_infos:
             # это хак по слову "ДЛЯ". get_graminfo возвращает для него две нормальных формы ДЛЯ и ДЛИТЬ что неверно.
@@ -59,38 +59,28 @@ class Lexeme(object):
         self.gram_infos = get_gram_infos(clear_word)
         self.is_word = bool(self.gram_infos) or word == self.SPECIAL_WORD
 
-    @property
-    def speech(self):
-        u"Свойство, отражающее часть речи лексеммы"
-        return self.get_gram_info('speech')
-
     def get_gram_info(self, key):
         if self.gram_infos:
             return map(attrgetter(key), self.gram_infos)
         return self.word
 
     def normalize(self):
-        u"Нормализация лексеммы - инфинитив"
+        u"""Нормализация лексеммы - инфинитив"""
         return self.get_gram_info('infinitive')
 
     def full_normalize(self):
-        u"""Нормализация лексеммы - инфинитив
-
-        :rtype: :py:class:`unicode`
-        :returns: инфинитив слова
-        """
         return map(attrgetter('infinitive'), filter(bool, self.gram_infos))
 
     def lemmatize(self):
-        u"Лемматизация лексеммы - основа слова"
+        u"""Лемматизация лексеммы - основа слова"""
         return self.get_gram_info('lemma')
 
     def __eq__(self, other):
-        u"Сравнение двух лексемм на равество"
+        u"""Сравнение двух лексемм на равество"""
         return self.word == other.word
 
     def like_to(self, other):
-        u"Сравнение лексемм на похожесть"
+        u"""Сравнение лексемм на похожесть"""
         for self_norm in self.normalize():
             for other_norm in other.normalize():
                 if self_norm and other_norm:
