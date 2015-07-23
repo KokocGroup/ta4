@@ -17,48 +17,28 @@ def common_check(word, text, placeholders=[]):
 
 
 def test_exact_analyzer():
-    word = Sentence(u'пластиковые окна')
-    text = TextHtml(u"купить пластиковые окна в москве")
-    analyze_text([word], text, analyzers=[ExactAnalyzer()])
-    common_check(word, text, [1, 2])
-
-
-def test_exact_analyzer2():
-    word = Sentence(u'пластиковые окна')
-    text = TextHtml(u"много хороших слов купить пластиковые окна")
-    analyze_text([word], text, analyzers=[ExactAnalyzer()])
-    common_check(word, text, [4, 5])
-
-
-def test_exact_analyzer_reverse():
-    word = Sentence(u'пластиковое окно')
-    text = TextHtml(u"купить пластиковые окна в москве")
-    analyze_text([word], text, analyzers=[ExactAnalyzer()])
-
-    for i, ph in enumerate(text.sentences[0].place_holders):
-        assert ph.markers == []
-
-
-def test_exact_analyzer_reverse2():
-    word = Sentence(u'пластиковые окна')
-    text = TextHtml(u"купить пластиковые великолепные окна в москве")
-    analyze_text([word], text, analyzers=[ExactAnalyzer()])
-
-    for i, ph in enumerate(text.sentences[0].place_holders):
-        assert ph.markers == []
+    test_table = [
+        (u'пластиковые окна', u'купить пластиковые окна в москве', [1, 2]),
+        (u'пластиковые окна', u'много хороших слов купить пластиковые окна', [4, 5]),
+        (u'пластиковое окно', u'купить пластиковые окна в москве', []),
+        (u'пластиковые окна', u'купить пластиковые великолепные окна в москве', []),
+    ]
+    for word, text, placeholders in test_table:
+        word = Sentence(word)
+        text = TextHtml(text)
+        analyze_text([word], text, analyzers=[ExactAnalyzer()])
+        common_check(word, text, placeholders)
 
 
 def test_subform_analyzer():
-    word = Sentence(u'[пластиковые] [*] [окна]')
-    text = TextHtml(u"купить пластиковые классные окна в москве")
-    analyze_text([word], text, analyzers=[SubformsAnalyzer()])
-    common_check(word, text, [1, 2, 3])
-
-
-def test_new_letter():
-    word = u'[новогдняя] [ёлка]'
-    keyword = Sentence(word)
-    assert word == keyword.text
-    text = TextHtml(u"купить новогднюю ёлку в москве недорого")
-    analyze_text([keyword], text, analyzers=[SubformsAnalyzer()])
-    common_check(keyword, text, [1, 2])
+    test_table = [
+        (u'[пластиковое] [*] [окно]', u'купить пластиковые классные окна в москве', [1, 2, 3]),
+        (u'[новогдняя] [ёлка]', u'купить новогднюю ёлку в москве недорого', [1, 2]),
+        (u'[пластиковое] [*] [окно]', u'установка пластиковых окон', []),
+        (u'[пластиковое] [*] [*] [окно]', u'пластиковые бронебойные анти-маскитные окна', [0, 1, 2, 3]),
+    ]
+    for word, text, placeholders in test_table:
+        word = Sentence(word)
+        text = TextHtml(text)
+        analyze_text([word], text, analyzers=[SubformsAnalyzer()])
+        common_check(word, text, placeholders)
