@@ -13,7 +13,6 @@ setup(
     package_dir={'text-analyze': 'text_analyze'},
     package_data={'text-analyze': ['text_analyze/data/*']},
     install_requires=[
-        'python-cdb==0.35',
         'nltk==3.0.0',
         'pymorphy2==0.8',
         'lxml==3.4.4',

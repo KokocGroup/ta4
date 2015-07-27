@@ -1,4 +1,6 @@
 # coding=utf-8
+from copy import deepcopy
+from operator import attrgetter
 from bs4 import BeautifulSoup, Tag
 from lxml.html import diff
 
@@ -33,10 +35,15 @@ class TextHtml(object):
                    .replace('</hr>', '').replace("&nbsp;", "<nbsp/>")
 
     def build_html(self):
+        u"""
+        build_html может вызываться несколько раз, и так как мы добавляем маркеры в теги,
+        то надо копировать структуру
+        """
         html = []
-        for tokens, place_holder in self.structure:
+        for tokens, place_holder in deepcopy(self.structure):
             if place_holder and place_holder.markers:
-                open_tag = u'<span data-markers="%s">' % u' '.join(place_holder.markers)
+                markers = u' '.join(map(attrgetter('hash'), place_holder.markers))
+                open_tag = u'<span data-markers="%s">' % markers
                 tokens[0].pre_tags.append(open_tag)
                 tokens[-1].post_tags.insert(0, u'</span>')
             html.append(u''.join(diff.expand_tokens(tokens)))
