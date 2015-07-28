@@ -11,7 +11,7 @@ setup(
     download_url='https://github.com/KokocGroup/text-analyze4/tarball/v{}'.format(VERSION),
     packages=['ta4'],
     package_dir={'ta4': 'ta4'},
-    package_data={'ta4': ['ta4/data/*']},
+    package_data={'ta4': ['data/nltk/english.pickle']},
     install_requires=[
         'nltk==3.0.0',
         'pymorphy2==0.8',
