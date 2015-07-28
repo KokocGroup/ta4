@@ -63,7 +63,7 @@ class Lexeme(object):
     def __init__(self, word):
         clear_word = clean_word_regexp.sub(ur'\1', word)
         self.word = clear_word.upper()
-        self.origin_word = clear_word
+        self.origin_word = clear_word.upper()
         self.gram_infos = get_gram_infos(clear_word)
 
     @property

@@ -1,8 +1,7 @@
 #! coding: utf-8
-from text_analyze import mark_with_words
-from text_analyze.text import TextHtml
-from text_analyze.sentence import Sentence
-from text_analyze.analyzer import ExactAnalyzer, SubformsAnalyzer
+from ta4 import mark_with_words, find_words
+from ta4.text import TextHtml
+from ta4.sentence import Sentence
 
 
 def common_check(word, text, placeholders=[]):
@@ -26,7 +25,7 @@ def test_exact_analyzer():
     for word, text, placeholders in test_table:
         word = Sentence(word)
         text = TextHtml(text)
-        mark_with_words([word], text, analyzers=[ExactAnalyzer()])
+        mark_with_words([word], text)
         common_check(word, text, placeholders)
 
 
@@ -41,7 +40,7 @@ def test_subform_analyzer():
     for word, text, placeholders in test_table:
         word = Sentence(word)
         text = TextHtml(text)
-        mark_with_words([word], text, analyzers=[SubformsAnalyzer()])
+        mark_with_words([word], text)
         common_check(word, text, placeholders)
 
 
@@ -51,7 +50,7 @@ def test_mark_multiple_words():
         Sentence(u'пластиковые окна в москве')
     ]
     text = TextHtml(u'Здравствуйте! Я бы хотел купить пластиковые окна в москве, и конечно - недорого')
-    mark_with_words(words, text, analyzers=[ExactAnalyzer()])
+    mark_with_words(words, text)
     phs = text.sentences[1].place_holders
 
     assert phs[3].markers[0].sentence.text == words[0].text
@@ -74,8 +73,48 @@ def test_mark_multiple_words():
 def test_build_with_markers():
     word = Sentence(u'пластиковые окна')
     text = TextHtml(u'<p>купить пластиковые окна в москве</p>')
-    mark_with_words([word], text, analyzers=[ExactAnalyzer()])
+    mark_with_words([word], text)
     html = u'<p>купить <span data-markers="e4ca1dc74c4a889f31a1e24bb690b5c7">пластиковые </span>'\
            u'<span data-markers="e4ca1dc74c4a889f31a1e24bb690b5c7">окна </span>в москве</p>'
     assert text.build_html() == html
+    # проверим что множественный билд разметки ничего не сломает(там видоизменяется структура)
     assert text.build_html() == html
+
+
+def test_find_words_without_intersection():
+    test_table = [
+        ({u'купить пластиковые окна': 1, u'пластиковые окна в москве': 1},
+         u'Купить пластиковые окна, причём недорого. Найти пластиковые окна в москве не так уж и просто.'),
+        ({u'[купить] [*] [окна]': 1, u'[пластиковые] [окна] [москве]': 1},
+         u'Я хочу купить пластиковые окна, причём недорого. Найти пластиковые окна в москве не так уж и просто.'),
+        ({u'[купить] [*] [окна]': 2},
+         u'Я хочу купить, офигенные окна, причём недорого. Купить пластиковые окна в москве не так уж и просто.'),
+    ]
+    for task, text in test_table:
+        words = map(Sentence, task.keys())
+        text = TextHtml(text)
+        mark_with_words(words, text)
+        # так как пересечений нет, то и дополненного задания не будет
+        assert task, {} == find_words(words, text)
+
+
+def test_find_words_with_intersections():
+    test_table = [
+        (
+            {u'купить пластиковые окна': 1, u'пластиковые окна в москве': 1},
+            u'купить пластиковые окна в москве',
+            {u'ПЛАСТИКОВЫЕ ОКНА': 1}
+        ),
+        (
+            {u'пластиковые окна': 1, u'[пластиковые] [окна]': 0},
+            u'купить пластиковые окна в москве',
+            {}
+        ),
+    ]
+    for task, text, new_task in test_table:
+        words = map(Sentence, task.keys())
+        text = TextHtml(text)
+        mark_with_words(words, text)
+        result, additional_words = find_words(words, text)
+        assert task == result
+        assert new_task == additional_words

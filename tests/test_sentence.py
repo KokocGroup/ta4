@@ -1,9 +1,9 @@
 #! coding: utf-8
 from operator import attrgetter
 
-from text_analyze import phrase_cmp
-from text_analyze.sentence import Sentence
-from text_analyze.lexeme import Lexeme
+from ta4 import phrase_cmp
+from ta4.sentence import Sentence
+from ta4.lexeme import Lexeme
 
 
 def test_creation():

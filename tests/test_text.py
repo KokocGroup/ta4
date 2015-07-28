@@ -1,5 +1,5 @@
 #! coding: utf-8
-from text_analyze.text import TextHtml
+from ta4.text import TextHtml
 
 
 def test_creation():

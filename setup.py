@@ -4,14 +4,14 @@ from setuptools import setup
 VERSION = "0.0.1"
 
 setup(
-    name='text-analyze',
+    name='ta4',
     description="",
     version=VERSION,
     url='https://github.com/KokocGroup/text-analyze4',
-    download_url='https://github.com/KokocGroup/google-parser/tarball/v{}'.format(VERSION),
-    packages=['text-analyze'],
-    package_dir={'text-analyze': 'text_analyze'},
-    package_data={'text-analyze': ['text_analyze/data/*']},
+    download_url='https://github.com/KokocGroup/text-analyze4/tarball/v{}'.format(VERSION),
+    packages=['ta4'],
+    package_dir={'ta4': 'ta4'},
+    package_data={'ta4': ['ta4/data/*']},
     install_requires=[
         'nltk==3.0.0',
         'pymorphy2==0.8',
