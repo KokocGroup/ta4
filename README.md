@@ -1,4 +1,4 @@
-ta4
+ta4 ![build-status](https://travis-ci.org/KokocGroup/text-analyze4.svg)
 ===========
 
 Пакет позволяет находит вхождения слов в текст в нужных словоформах.
