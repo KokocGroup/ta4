@@ -39,9 +39,6 @@ class GramInfo(object):
         self.normal_form = normal_form
         self.part_of_speech = part_of_speech
 
-    def __repr__(self):
-        return u"<inf: %s>" % self.normal_form
-
     @property
     def is_important_pos(self):
         return self.part_of_speech in IMPORTANT_PARTS_OF_SPEECH
@@ -49,10 +46,7 @@ class GramInfo(object):
 
 def get_gram_infos(word):
     results = morph.parse(word)
-    if not results:
-        return [GramInfo(word)]
     return [GramInfo(r.normal_form, r.tag.POS) for r in results]
-    return map(GramInfo, map(attrgetter('normal_form'), results))
 
 
 class Lexeme(object):
@@ -77,3 +71,6 @@ class Lexeme(object):
 
     def get_all_normal_phorms(self):
         return set(map(attrgetter('normal_form'), self.gram_infos))
+
+    def __repr__(self):
+        return self.word.encode('utf-8')

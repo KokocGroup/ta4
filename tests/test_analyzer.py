@@ -1,5 +1,5 @@
 #! coding: utf-8
-from ta4 import mark_with_words, find_words
+from ta4 import mark_with_words, find_words, group_markers, merge_filter
 from ta4.text import TextHtml
 from ta4.sentence import Sentence
 
@@ -81,6 +81,49 @@ def test_build_with_markers():
     assert text.build_html() == html
 
 
+def test_group_markers():
+    markers = [
+        (Sentence(u'test1'), {'min': 0, 'max': 4}),
+        (Sentence(u'test2'), {'min': 1, 'max': 5}),
+        (Sentence(u'test3'), {'min': 1, 'max': 5}),
+        (Sentence(u'test4'), {'min': 4, 'max': 7}),
+        (Sentence(u'test5'), {'min': 9, 'max': 12}),
+    ]
+    results = list(group_markers(markers))
+    assert len(results) == 2
+    assert results[0] == [markers[0], markers[1], markers[3]]
+    assert results[1] == markers[4:]
+
+    markers = [
+        (Sentence(u'test1'), {'min': 0, 'max': 4}),
+        (Sentence(u'test2'), {'min': 5, 'max': 7}),
+        (Sentence(u'test3'), {'min': 9, 'max': 12}),
+    ]
+    results = list(group_markers(markers))
+    assert len(results) == 3
+    assert results[0] == markers[:1]
+    assert results[1] == markers[1:2]
+    assert results[2] == markers[2:]
+
+
+def test_merging_markers():
+    markers = [
+        (Sentence(u'test1'), {'min': 0, 'max': 0}),
+        (Sentence(u'test2'), {'min': 0, 'max': 1}),
+        (Sentence(u'test3'), {'min': 0, 'max': 0}),
+    ]
+    result = merge_filter(markers)
+    assert result == markers[:2]
+
+    markers = [
+        (Sentence(u'test1'), {'min': 2, 'max': 4}),
+        (Sentence(u'test2'), {'min': 1, 'max': 5}),
+        (Sentence(u'test3'), {'min': 2, 'max': 3}),
+    ]
+    result = merge_filter(markers)
+    assert result == markers[:2]
+
+
 def test_find_words_without_intersection():
     test_table = [
         ({u'купить пластиковые окна': 1, u'пластиковые окна в москве': 1},
@@ -89,13 +132,36 @@ def test_find_words_without_intersection():
          u'Я хочу купить пластиковые окна, причём недорого. Найти пластиковые окна в москве не так уж и просто.'),
         ({u'[купить] [*] [окна]': 2},
          u'Я хочу купить, офигенные окна, причём недорого. Купить пластиковые окна в москве не так уж и просто.'),
+        ({u'[САНАТОРИЙ] [РОССИЯ]': 1, u'санатории россии': 1},
+         u'На нашей теретории лучшие санатории России. Санаторий в России хорошо подходит для '
+         u'оздаровления организма. Все вранье, санаторий - это плохо. Особенно в России.'),
+        ({u"[МАШИНА]": 2, u"МАШИНЫ": 1},
+         u'Машину угнали! В машине были все документы! У машины стояло 2 странных парня'),
+        ({u"[БАНК]": 1}, u'Я должен денег банку!'),
     ]
     for task, text in test_table:
         words = map(Sentence, task.keys())
         text = TextHtml(text)
         mark_with_words(words, text)
         # так как пересечений нет, то и дополненного задания не будет
-        assert task, {} == find_words(words, text)
+        result, additional_words = find_words(words, text)
+        assert additional_words == {}
+        assert result == task
+
+
+def test_merge():
+    test_table = [
+        ({u'окна в москве': 1, u'[купить] [окна] [москва] [недорого]': 1},
+         u'я бы хотел купить окна в москве недорого, и без проблем',
+         {u'ОКНА В МОСКВЕ': 1}),
+    ]
+    for task, text, new_task in test_table:
+        words = map(Sentence, task.keys())
+        text = TextHtml(text)
+        mark_with_words(words, text)
+        result, additional_words = find_words(words, text)
+        assert additional_words == new_task
+        assert result == task
 
 
 def test_find_words_with_intersections():
@@ -110,6 +176,27 @@ def test_find_words_with_intersections():
             u'купить пластиковые окна в москве',
             {}
         ),
+        (
+            {
+                u'быстро выгодно купить качественное пластиковое': 1,
+                u'выгодно купить качественное пластиковое окно': 1,
+                u'пластиковое окно в москве': 1,
+            },
+            u'быстро выгодно купить качественное пластиковое окно в москве',
+            {
+                u'ВЫГОДНО КУПИТЬ КАЧЕСТВЕННОЕ ПЛАСТИКОВОЕ': 1,
+                u'ПЛАСТИКОВОЕ ОКНО': 1
+            }
+        ),
+        ({u'[ПОЛИЭТИЛЕНОВЫЙ] [ЗЕЛЕНЫЙ]': 1, u'[ПОЛИЭТИЛЕНОВЫЙ]': 2, u'ПОЛИЭТИЛЕНОВЫЙ': 1},
+         u"полиэтиленовый зеленый пакет болтался на дереве.Полиэтиленовый пакет. Полиэтиленовая лямка! Полиэтиленовая!",
+         {u'ПОЛИЭТИЛЕНОВЫЙ': 1}),
+        ({u'купить пластиковые окна': 1, u'[купить] [*] [окна] [москва]': 1},
+         u"купить пластиковые окна это круто. Хотите купить накрутейшие окна в москве?.",
+         {}),
+        ({u'запчасть для погрузчика': 1, u'[запчасть] [*] [погрузчик]': 1, u'запчасть на погрузчик': 1},
+         u"запчасть для погрузчика. запчасть зеленого погрузчика. запчасть на погрузчик.",
+         {}),
     ]
     for task, text, new_task in test_table:
         words = map(Sentence, task.keys())

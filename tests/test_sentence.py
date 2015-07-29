@@ -3,7 +3,7 @@ from operator import attrgetter
 
 from ta4 import phrase_cmp
 from ta4.sentence import Sentence
-from ta4.lexeme import Lexeme
+from ta4.lexeme import Lexeme,  get_gram_infos
 
 
 def test_creation():
@@ -26,15 +26,28 @@ def test_creation_subform_sentence():
 
 def test_lexeme_is_important():
     test_table = [
-        (u'в', False),
-        (u'машина', True),
-        (u'для', False),
-        (u'при', False),
-        (u'окна', True),
-        (u'пластиковые', True),
+        (u'в', False, False),
+        (u'машина', True, False),
+        (u'для', False, False),
+        (u'при', False, False),
+        (u'окна', True, False),
+        (u'пластиковые', True, False),
+        (u'[*]', False, True),
     ]
-    for word, is_important in test_table:
-        assert Lexeme(word).is_important == is_important
+    for word, is_important, is_special in test_table:
+        lexeme = Lexeme(word)
+        assert lexeme.is_important == is_important
+
+
+def test_get_gram_infos():
+    test_table = [
+        (u'машина', 4),
+        (u'окно', 2),
+        (u'двигать', 1),
+    ]
+    for word, counter in test_table:
+        gram_info = get_gram_infos(word)
+        assert len(gram_info) == counter
 
 
 def test_sorting_sentences():

@@ -30,6 +30,12 @@ class TextHtml(object):
         for sentence in self.sentences:
             yield sentence
 
+    def __len__(self):
+        return len(self.sentences)
+
+    def __repr__(self):
+        return self.text.encode('utf-8')
+
     def prepare_html(self, html):
         return html.replace('<br>', '<br/>').replace('<hr>', '<hr/>').replace('</br>', '')\
                    .replace('</hr>', '').replace("&nbsp;", "<nbsp/>")
@@ -57,6 +63,3 @@ class TextHtml(object):
             if tag:
                 tag.replace_with(original_tag)
         return unicode(html).replace(u"<nbsp></nbsp>", u"\xa0")
-
-    def __repr__(self):
-        return self.bs.get_text().encode('utf-8')

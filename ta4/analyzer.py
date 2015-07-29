@@ -2,12 +2,7 @@
 from operator import attrgetter
 
 
-class IAnalyzer(object):
-    def mark(self, keyword, sentence):
-        raise NotImplementedError
-
-
-class ExactAnalyzer(IAnalyzer):
+class ExactAnalyzer(object):
     def get_sentence_placeholders(self, sentence):
         return sentence.place_holders
 

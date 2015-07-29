@@ -1,4 +1,5 @@
 #! coding: utf-8
+from operator import itemgetter
 from collections import defaultdict, OrderedDict
 from pkg_resources import resource_filename
 
@@ -20,9 +21,8 @@ def mark_with_words(words, text, analyzers={}):
 
     :param words: list text_analyze.sentence.Sentence
     :param text: list text_analyze.text.TextHtml
-    :param analyzers: list text_analyze.analyzer.IAnalyzer
     """
-
+    # Ключом будет являться, является ли задание - заданием на поиск точного вхождения
     analyzers = analyzers or {
         True: ExactAnalyzer(),
         False: SubformsAnalyzer(),
@@ -52,45 +52,91 @@ def find_words(words, text):
         for ph in sentence.place_holders:
             for marker in ph.markers:
                 if marker.sentence not in markers:
-                    markers[marker.sentence] = {'min': ph.position}
+                    markers[marker.sentence] = {'min': ph.position, 'max': ph.position}
                 else:
                     markers[marker.sentence]['max'] = ph.position
 
         markers = markers.items()
-        N = len(markers)
-        i = 0
-        while i < N:
-            sentence, marker = markers[i]
-            if i < N-1:
-                next_sentence, next_marker = markers[i+1]
-                # если маркеры отметили один и тот же участок предложения,
-                # побеждает сильнейший
-                if marker == next_marker:
-                    winner = sorted([sentence, next_sentence], cmp=phrase_cmp, reverse=True)[0]
-                    counter[winner.text] += 1
-                elif next_marker['min'] > marker['max']:
-                    # пересечения нет
-                    counter[sentence.text] += 1
-                else:
-                    if next_marker['max'] > marker['max']:
-                        # пересечение
-                        counter[sentence.text] += 1
-                        counter[next_sentence.text] += 1
-                        new_phrase = []
-                        for ph in sentence.place_holders[next_marker['min']:marker['max']+1]:
-                            new_phrase.append(ph.origin_word)
-                        new_phrase = u' '.join(new_phrase)
-                        new_tasks[new_phrase] += 1
-                    else:
-                        # поглощение - вовсе пропускаем следующий маркет
-                        counter[sentence.text] += 1
-                i += 2
-                continue
+        # группируем маркеры по пересечению
+        # в итоге получим кластера, которые хоть как то пересекаются
+        for markers_chunk in group_markers(markers):
+            if len(markers_chunk) == 1:
+                # пересечений по маркерам нет
+                marker_sentence, _ = markers_chunk[0]
+                counter[marker_sentence.text] += 1
             else:
-                counter[sentence.text] += 1
-            i += 1
+                # подсчитываем вхождения и добавляем попарное пересечение в задание
+                length = len(markers_chunk) - 1
+                for i, (marker_sentence, marker) in enumerate(markers_chunk):
+                    counter[marker_sentence.text] += 1
+                    if i < length:
+                        _, next_marker = markers_chunk[i+1]
+                        text = get_intersection(marker, next_marker, sentence)
+                        new_tasks[text] += 1
 
     return counter, dict(new_tasks)
+
+
+def group_markers(markers):
+    result = []
+    length = len(markers) - 1
+    for i, (_, marker) in enumerate(markers):
+        result.append(markers[i])
+        if i < length:
+            _, next_marker = markers[i+1]
+            if next_marker['min'] > marker['max']:
+                # сортируем по приоритету
+                result = sorted(result, cmp=phrase_cmp, key=itemgetter(0), reverse=True)
+                # отфильтровываем поглащённые
+                result = merge_filter(result)
+                if result:
+                    yield result
+                result = []
+    result = sorted(result, cmp=phrase_cmp, key=itemgetter(0), reverse=True)
+    result = merge_filter(result)
+    if result:
+        yield result
+
+
+def merge_filter(markers):
+    """
+    Фильтрует маркеры на предмет полного поглощения, так как markers отсортированы по приоритету,
+    функция выкинет маркеры, которые полностью поглощаются более приоритетными фразами
+    """
+    result = []
+    for i, (sentence, marker) in enumerate(markers):
+        # смотрим на предыдущие маркеры, входит ли в них i-ый
+        for _, bigger_marker in result:
+            if bigger_marker['min'] <= marker['min'] <= bigger_marker['max'] \
+               and bigger_marker['min'] <= marker['max'] <= bigger_marker['max']:
+                break
+        else:
+            result.append((sentence, marker))
+    return result
+
+
+def get_intersection(marker, next_marker, sentence):
+    """
+    Возвращает текст из пересечения маркеров
+    """
+    #  пересечение вида ------
+    #                       ------
+    if marker['min'] <= next_marker['min'] <= marker['max'] and next_marker['max'] > marker['max']:
+        i, j = next_marker['min'], marker['max']
+    #  пересечение вида ---
+    #                 --------
+    elif next_marker['min'] < marker['max'] and next_marker['max'] > marker['max']:
+        i, j = marker['min'], marker['max']
+    #  пересечение вида ---------
+    #                     ----
+    elif marker['min'] < next_marker['min'] < marker['max'] and marker['min'] < next_marker['max'] < marker['max']:
+        i, j = next_marker['min'], next_marker['max']
+    #  пересечение вида --------
+    #               --------
+    else:
+        i, j = marker['min'], next_marker['max']
+
+    return u' '.join([ph.origin_word for ph in sentence.place_holders[i:j+1]])
 
 
 def phrase_cmp(one, another):

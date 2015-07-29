@@ -25,6 +25,3 @@ class PlaceHolder(Lexeme):
     def add_marker(self, position, word):
         marker = Marker(word, position)
         self.markers.append(marker)
-
-    def __repr__(self):
-        return "%d: '%s' (%d markers)" % (self.position, self.word.encode('utf-8'), len(self.markers))
