@@ -1,4 +1,4 @@
-ta4 [![Travis](https://travis-ci.org/KokocGroup/ta4.svg?branch=master)](https://travis-ci.org/KokocGroup/ta4) [![Coverage Status](https://coveralls.io/repos/KokocGroup/ta4/badge.svg?branch=correct&service=github)](https://coveralls.io/github/KokocGroup/ta4?branch=correct)
+ta4 [![Travis](https://travis-ci.org/KokocGroup/ta4.svg?branch=master)](https://travis-ci.org/KokocGroup/ta4) [![Coverage Status](https://coveralls.io/repos/KokocGroup/ta4/badge.svg?branch=master&service=github)](https://coveralls.io/github/KokocGroup/ta4?branch=master)
 ===========
 
 Пакет позволяет находит вхождения слов в текст в нужных словоформах.
