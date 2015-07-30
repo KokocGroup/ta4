@@ -24,6 +24,10 @@ class TextHtml(object):
                 elem.replace_with(tag)
                 ignored_id += 1
 
+        # remove old markers
+        for element in self.bs.findAll(attrs={'data-markers': True}):
+            element.unwrap()
+
         self.structure, self.sentences = get_sentences(unicode(self.bs))
 
     def __iter__(self):

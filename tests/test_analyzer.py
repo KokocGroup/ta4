@@ -80,6 +80,11 @@ def test_build_with_markers():
     # проверим что множественный билд разметки ничего не сломает(там видоизменяется структура)
     assert text.build_html() == html
 
+    # при повторной проверке уже отмаркированного списка - старые маркировки очищаются
+    text = TextHtml(html)
+    mark_with_words([word], text)
+    assert text.build_html() == html
+
 
 def test_group_markers():
     markers = [
