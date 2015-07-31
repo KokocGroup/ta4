@@ -194,3 +194,12 @@ def test_find_words_with_intersections():
         result, additional_words = find_words(words, text)
         assert task == result
         assert new_task == additional_words
+
+
+def test_analyze_high_index_intersection():
+    text = TextHtml(u"Здравствуйте! Извините за назойлевость, но я не могу не спросить! Я бы хотел приобрести фронтальные погрузчики!")
+    words = map(Sentence, [u'хотел приобрести фронтальные', u'приобрести фронтальные погрузчики'])
+    mark_with_words(words, text)
+    result, additional_words = find_words(words, text)
+    assert additional_words != {}
+    assert u'' not in additional_words

@@ -135,8 +135,12 @@ def get_intersection(marker, next_marker, sentence):
     #               --------
     else:
         i, j = marker['min'], next_marker['max']
+    phrase = []
+    for ph in sentence.place_holders:
+        if i <= ph.position <= j:
+            phrase.append(ph.origin_word)
 
-    return u' '.join([ph.origin_word for ph in sentence.place_holders[i:j+1]])
+    return u' '.join(phrase)
 
 
 def phrase_cmp(one, another):
