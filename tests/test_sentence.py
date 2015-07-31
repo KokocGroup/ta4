@@ -26,17 +26,18 @@ def test_creation_subform_sentence():
 
 def test_lexeme_is_important():
     test_table = [
+        (u'[*]', False, True),
         (u'в', False, False),
         (u'машина', True, False),
         (u'для', False, False),
         (u'при', False, False),
         (u'окна', True, False),
         (u'пластиковые', True, False),
-        (u'[*]', False, True),
     ]
     for word, is_important, is_special in test_table:
         lexeme = Lexeme(word)
         assert lexeme.is_important == is_important
+        assert lexeme.is_special == is_special
 
 
 def test_get_gram_infos():

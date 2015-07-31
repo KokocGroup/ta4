@@ -37,7 +37,7 @@ class GramInfo(object):
 
     def __init__(self, normal_form, part_of_speech):
         self.normal_form = normal_form
-        self.part_of_speech = part_of_speech
+        self.part_of_speech = part_of_speech or u'NOUN'
 
     @property
     def is_important_pos(self):
@@ -67,6 +67,8 @@ class Lexeme(object):
     @property
     def is_important(self):
         u"""Не важная часть речи, например предлоги или частицы, не учавствуют в сравнениях"""
+        if self.is_special:
+            return False
         return all(map(attrgetter('is_important_pos'), self.gram_infos))
 
     def get_all_normal_phorms(self):

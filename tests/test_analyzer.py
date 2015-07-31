@@ -212,3 +212,11 @@ def test_multiple_words_in_one_sentence():
     mark_with_words([word], text)
     result, _ = find_words([word], text)
     assert result.values()[0] == 2
+
+
+def test_english_titles():
+    word = Sentence(u'[бензопила] [husqvarna]')
+    text = TextHtml(u'Бензопилы husqvarna - одни из лучших')
+    mark_with_words([word], text)
+    result, _ = find_words([word], text)
+    assert result.values()[0] == 1
