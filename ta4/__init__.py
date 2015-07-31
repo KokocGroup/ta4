@@ -55,6 +55,8 @@ def find_words(words, text):
                     markers[marker.sentence] = {'min': ph.position, 'max': ph.position}
                 else:
                     markers[marker.sentence]['max'] = ph.position
+        # купить пластиковые окна: {min: 2, max: 4}
+        # пластиковые окна в москве: {min: 3, max: 6}
 
         markers = markers.items()
         # группируем маркеры по пересечению

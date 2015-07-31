@@ -19,6 +19,9 @@ class Sentence(object):
 
     @property
     def is_exact_task(self):
+        """
+        Если задание по словоформам - вернёт False(например "[пластиковые] [окна]")
+        """
         return not any(map(attrgetter('is_subform_word'), self.place_holders))
 
     def count(self, word):
