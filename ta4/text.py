@@ -16,13 +16,13 @@ class TextHtml(object):
         self.text = html
         self.sentences = []
         self.ignored_element_map = {}
-        ignored_id = 1
+
         for selector in ignored_selectors:
             for elem in self.bs.select(selector):
-                tag = Tag(name=IGNORED_TAG_TEMPLATE.format(ignored_id))
+                i = len(self.ignored_element_map) + 1
+                tag = Tag(name=IGNORED_TAG_TEMPLATE.format(i))
                 self.ignored_element_map[tag] = elem
                 elem.replace_with(tag)
-                ignored_id += 1
 
         # remove old markers
         for element in self.bs.findAll(attrs={'data-markers': True}):

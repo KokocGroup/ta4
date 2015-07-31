@@ -61,8 +61,10 @@ def split_token(word_tokens):
                 length = len(token)
                 i = 0
             i += 1
-        if len(token):
-            tokens.append(token)
+        # если встретили пустой тег - скипаем его
+        if len(token) == 0 and not token.pre_tags and not token.post_tags:
+            continue
+        tokens.append(token)
     if tokens:
         results.append(tokens)
     return results
@@ -91,7 +93,7 @@ def get_sentences(text):
             place_holders.append(place_holder)
             structure.append([tokens, place_holder])
 
-            if last_token[-1] in SENTENCES_END:
+            if last_token and last_token[-1] in SENTENCES_END:
                 sentences.append(Sentence(sentence, place_holders))
                 sentence = u''
                 place_holders = []
