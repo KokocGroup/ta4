@@ -6,7 +6,7 @@ class ExactAnalyzer(object):
     def get_sentence_placeholders(self, sentence):
         return sentence.place_holders
 
-    def mark(self, keyword, sentence):
+    def mark(self, keyword, sentence, number):
         placeholders = self.get_sentence_placeholders(sentence)
         stop = len(placeholders) - len(keyword.place_holders)
         for i in xrange(len(placeholders)):
@@ -17,8 +17,10 @@ class ExactAnalyzer(object):
                     break
             else:
                 while j >= 0:
-                    placeholders[i+j].add_marker(j, keyword)
+                    placeholders[i+j].add_marker(j, keyword, number)
                     j -= 1
+                number += 1
+        return number
 
     def equals(self, ph, other):
         return ph.origin_word == other.origin_word

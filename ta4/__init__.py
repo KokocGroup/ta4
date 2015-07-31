@@ -27,11 +27,11 @@ def mark_with_words(words, text, analyzers={}):
         True: ExactAnalyzer(),
         False: SubformsAnalyzer(),
     }
-
+    number = 1  # скозная нумерация маркеров
     for word in words:
         for sentence in text:
             analyzer = analyzers[word.is_exact_task]
-            analyzer.mark(word, sentence)
+            number = analyzer.mark(word, sentence, number)
 
 
 def find_words(words, text):
@@ -48,17 +48,7 @@ def find_words(words, text):
     counter = {w.text: 0 for w in words}
     new_tasks = defaultdict(int)
     for sentence in text:
-        markers = OrderedDict()
-        for ph in sentence.place_holders:
-            for marker in ph.markers:
-                if marker.sentence not in markers:
-                    markers[marker.sentence] = {'min': ph.position, 'max': ph.position}
-                else:
-                    markers[marker.sentence]['max'] = ph.position
-        # купить пластиковые окна: {min: 2, max: 4}
-        # пластиковые окна в москве: {min: 3, max: 6}
-
-        markers = markers.items()
+        markers = get_markers(sentence)
         # группируем маркеры по пересечению
         # в итоге получим кластера, которые хоть как то пересекаются
         for markers_chunk in group_markers(markers):
@@ -77,6 +67,26 @@ def find_words(words, text):
                         new_tasks[text] += 1
 
     return counter, dict(new_tasks)
+
+
+def get_markers(sentence):
+    """
+    Для предложения вернёт все маркеры, с диапазоноп позиций
+
+    (u'купить пластиковые окна', {min: 2, max: 4})
+    (u'пластиковые окна в москве', {min: 3, max: 6})
+    """
+    markers = OrderedDict()
+    marker_id_to_sentence = {}
+    for ph in sentence.place_holders:
+        for marker in ph.markers:
+            marker_id_to_sentence[marker.id] = marker.sentence
+            if marker.id not in markers:
+                markers[marker.id] = {'min': ph.position, 'max': ph.position}
+            else:
+                markers[marker.id]['max'] = ph.position
+    result = [(marker_id_to_sentence[pk], positions) for pk, positions in markers.items()]
+    return result
 
 
 def group_markers(markers):

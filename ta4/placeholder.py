@@ -5,7 +5,11 @@ from lexeme import Lexeme
 
 
 class Marker(object):
-    def __init__(self, sentence, position):
+    def __init__(self, sentence, position, marker_id):
+        """
+        marker_id - признак позволяющий найти
+        """
+        self.id = marker_id
         self.sentence = sentence
         self.position = position
 
@@ -22,6 +26,6 @@ class PlaceHolder(Lexeme):
         # этот плейсхолдер - словоформа
         self.is_subform_word = word.startswith('[') and word.endswith(']')
 
-    def add_marker(self, position, word):
-        marker = Marker(word, position)
+    def add_marker(self, position, word, marker_id):
+        marker = Marker(word, position, marker_id)
         self.markers.append(marker)
