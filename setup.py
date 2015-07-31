@@ -1,7 +1,7 @@
 from setuptools import setup
 
 
-VERSION = "0.1.9"
+VERSION = "0.1.10"
 
 setup(
     name='ta4',
