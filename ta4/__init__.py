@@ -92,17 +92,22 @@ def get_markers(sentence):
 def group_markers(markers):
     result = []
     length = len(markers) - 1
+    max_pos = 0
     for i, (_, marker) in enumerate(markers):
         result.append(markers[i])
+        if max_pos < marker['max']:
+            max_pos = marker['max']
         if i < length:
             _, next_marker = markers[i+1]
-            if next_marker['min'] > marker['max']:
+            # Проверяем, не началась ли другая группа маркеров
+            if next_marker['min'] > max_pos:
                 # сортируем по приоритету
                 result = sorted(result, cmp=phrase_cmp, key=itemgetter(0), reverse=True)
                 # отфильтровываем поглащённые
                 result = merge_filter(result)
                 if result:
                     yield result
+                max_pos = next_marker['max']
                 result = []
     result = sorted(result, cmp=phrase_cmp, key=itemgetter(0), reverse=True)
     result = merge_filter(result)
