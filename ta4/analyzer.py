@@ -23,7 +23,7 @@ class ExactAnalyzer(object):
         return number
 
     def equals(self, ph, other):
-        return ph.origin_word == other.origin_word
+        return ph.origin_word == other.origin_word or ph.is_special
 
 
 class SubformsAnalyzer(ExactAnalyzer):

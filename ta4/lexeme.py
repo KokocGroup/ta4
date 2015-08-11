@@ -52,7 +52,7 @@ def get_gram_infos(word):
 class Lexeme(object):
     __slots__ = ('word', 'origin_word', 'gram_infos')
 
-    SPECIAL_WORD = '[*]'
+    SPECIAL_WORDS = '[*]', '*'
 
     def __init__(self, word):
         clear_word = clean_word_regexp.sub(ur'\1', word)
@@ -62,7 +62,7 @@ class Lexeme(object):
 
     @property
     def is_special(self):
-        return self.origin_word == self.SPECIAL_WORD
+        return self.origin_word in self.SPECIAL_WORDS
 
     @property
     def is_important(self):

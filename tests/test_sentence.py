@@ -27,6 +27,7 @@ def test_creation_subform_sentence():
 def test_lexeme_is_important():
     test_table = [
         (u'[*]', False, True),
+        (u'*', False, True),
         (u'в', False, False),
         (u'машина', True, False),
         (u'для', False, False),

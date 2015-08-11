@@ -168,7 +168,7 @@ def phrase_cmp(one, another):
     :param another: text_analyze.sentence.Sentence
     """
     # точное вхождение приоритетнее словоформ
-    subform_cmp = cmp(one.is_exact_task, another.is_exact_task)
+    subform_cmp = cmp(one.is_exact_task and not one.is_special, another.is_exact_task and not another.is_special)
     if subform_cmp != 0:
         return subform_cmp
     # фраза с большим числом слов - приоритетнее

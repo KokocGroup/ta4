@@ -24,5 +24,9 @@ class Sentence(object):
         """
         return not any(map(attrgetter('is_subform_word'), self.place_holders))
 
+    @property
+    def is_special(self):
+        return any(map(attrgetter('is_special'), self.place_holders))
+
     def count(self, word):
         return len([ph for ph in self.place_holders if ph.word == word])
