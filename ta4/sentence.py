@@ -30,3 +30,7 @@ class Sentence(object):
 
     def count(self, word):
         return len([ph for ph in self.place_holders if ph.word == word])
+
+    @property
+    def exact_count(self):
+        return len(filter(lambda x: not x.is_subform_word, self.place_holders))

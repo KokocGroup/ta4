@@ -229,7 +229,6 @@ def test_find_words_with_intersections():
 
 
 def test_analyze_high_index_intersection():
-    # text = TextHtml(u"Здравствуйте! Извините за назойлевость, но я не могу не спросить! Я бы хотел приобрести фронтальные погрузчики!")
     text = TextHtml(u"Я бы хотел приобрести фронтальные погрузчики!")
     words = map(Sentence, [u'хотел приобрести фронтальные', u'приобрести фронтальные погрузчики'])
     mark_with_words(words, text)
@@ -252,3 +251,13 @@ def test_english_titles():
     mark_with_words([word], text)
     result, _ = find_words([word], text)
     assert result.values()[0] == 1
+
+
+def test_asterisk_in_exact_word():
+    words = map(Sentence, [u'игры [*] разработчика', u'игры'])
+    text = TextHtml(u'игры находит, но не игры русского разработчика')
+    mark_with_words(words, text)
+    result, additional_words = find_words(words, text)
+    assert additional_words == {}
+    assert result[u'игры'] == 1
+    assert result[u'игры [*] разработчика'] == 1

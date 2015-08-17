@@ -14,6 +14,9 @@ filename = resource_filename("ta4", "data/nltk/english.pickle")
 tokenizer = nltk.data.load(filename)
 
 
+SPECIAL_WORDS = '[*]', '*'
+
+
 def mark_with_words(words, text, analyzers={}):
     u"""
     Находит в тексте вхождения слов, при помощи анализаторов.
@@ -38,7 +41,8 @@ def find_words(words, text):
     u"""
     Из размеченного текста(функцией mark_with_words), выбирает вхождения слов,
     и формирует список какая фраза сколько раз вошло в текст, согласно приоритетам:
-     - точное вхождение, приоритетнее вхождения по словоформам("пластиковые окна" > "[купить] [пластиковое] [окно]")
+     - Фраза с большим числом точных вхождений приоритетнее("купить пластиковые окна" > "купить [*] окно",
+        "купить зеленый шар" > "купить * шар")
      - вхождение с большим числом слов, приоритетнее ("купить пластивые окна" > "пластиковое окно")
      - при сравнении вхождений по словоформам при равенстве числа слов, приоритетнее то,
        в котором меньше звёздочек ("[купить] [пластиковое] [окно]" > "[купить] [*] [окно]")
@@ -74,6 +78,7 @@ def get_markers(sentence):
     Для предложения вернёт все маркеры, с диапазоноп позиций
 
     (u'купить пластиковые окна', {min: 2, max: 4})
+    (u'купить пластиковые окна', {min: 9, max: 11})
     (u'пластиковые окна в москве', {min: 3, max: 6})
     """
     markers = OrderedDict()
@@ -167,16 +172,18 @@ def phrase_cmp(one, another):
     :param one: text_analyze.sentence.Sentence
     :param another: text_analyze.sentence.Sentence
     """
-    # точное вхождение приоритетнее словоформ
-    subform_cmp = cmp(one.is_exact_task and not one.is_special, another.is_exact_task and not another.is_special)
-    if subform_cmp != 0:
-        return subform_cmp
+    # фраза с большим числом точных вхождений, приоритетнее
+    len_exact_cmp = cmp(one.exact_count, another.exact_count)
+    if len_exact_cmp != 0:
+        return len_exact_cmp
     # фраза с большим числом слов - приоритетнее
     len_cmp = cmp(len(one), len(another))
     if len_cmp != 0:
         return len_cmp
 
     # для словоформ с равным числом слов, приоритетное то, где меньше звёздочек
-    if not one.is_exact_task and not another.is_exact_task:
-        return cmp(one.count(u'[*]'), another.count(u'[*]')) * -1
+    for spec_word in SPECIAL_WORDS:
+        res = cmp(one.count(spec_word), another.count(spec_word)) * -1
+        if res != 0:
+            return res
     return len_cmp

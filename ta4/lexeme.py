@@ -3,7 +3,7 @@
 import re
 from operator import attrgetter
 
-from . import morph
+from . import morph, SPECIAL_WORDS
 
 
 clean_word_regexp = re.compile(ur'^[^\w]*([-\w]+)[^\w]*$', re.U | re.I)
@@ -52,8 +52,6 @@ def get_gram_infos(word):
 class Lexeme(object):
     __slots__ = ('word', 'origin_word', 'gram_infos')
 
-    SPECIAL_WORDS = '[*]', '*'
-
     def __init__(self, word):
         clear_word = clean_word_regexp.sub(ur'\1', word)
         self.word = clear_word.upper()
@@ -62,7 +60,7 @@ class Lexeme(object):
 
     @property
     def is_special(self):
-        return self.origin_word in self.SPECIAL_WORDS
+        return self.origin_word in SPECIAL_WORDS
 
     @property
     def is_important(self):
