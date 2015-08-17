@@ -58,19 +58,29 @@ def find_words(words, text):
         for markers_chunk in group_markers(markers):
             if len(markers_chunk) == 1:
                 # пересечений по маркерам нет
-                marker_sentence, _ = markers_chunk[0]
+                marker_sentence, marker = markers_chunk[0]
                 counter[marker_sentence.text] += 1
+                activate_marker(marker_sentence, marker, sentence)
             else:
                 # подсчитываем вхождения и добавляем попарное пересечение в задание
                 length = len(markers_chunk) - 1
                 for i, (marker_sentence, marker) in enumerate(markers_chunk):
                     counter[marker_sentence.text] += 1
+                    activate_marker(marker_sentence, marker, sentence)
                     if i < length:
                         _, next_marker = markers_chunk[i+1]
                         text = get_intersection(marker, next_marker, sentence)
                         new_tasks[text] += 1
 
     return counter, dict(new_tasks)
+
+
+def activate_marker(marker_sentence, marker, sentence):
+    for placeholder in sentence.place_holders:
+        if marker['min'] <= placeholder.position <= marker['max']:
+            for m in placeholder.markers:
+                if m.sentence == marker_sentence:
+                    m.is_active = True
 
 
 def get_markers(sentence):

@@ -12,10 +12,14 @@ class Marker(object):
         self.id = marker_id
         self.sentence = sentence
         self.position = position
+        self.is_active = False
 
     @property
     def hash(self):
-        return hashlib.md5(self.sentence.text.encode('utf-8')).hexdigest()
+        marker_hash = hashlib.md5(self.sentence.text.encode('utf-8')).hexdigest()
+        if self.is_active:
+            return marker_hash
+        return "inactive-%s" % marker_hash
 
 
 class PlaceHolder(Lexeme):

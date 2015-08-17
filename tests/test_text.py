@@ -1,5 +1,5 @@
 #! coding: utf-8
-from ta4 import mark_with_words
+from ta4 import mark_with_words, find_words
 from ta4.text import TextHtml
 from ta4.sentence import Sentence
 
@@ -41,6 +41,11 @@ def test_build_with_markers():
     word = Sentence(u'пластиковые окна')
     text = TextHtml(u'<p>купить пластиковые окна в москве</p>')
     mark_with_words([word], text)
+    html = u'<p>купить <span data-markers="inactive-e4ca1dc74c4a889f31a1e24bb690b5c7">пластиковые </span>'\
+           u'<span data-markers="inactive-e4ca1dc74c4a889f31a1e24bb690b5c7">окна </span>в москве</p>'
+    assert text.build_html() == html
+
+    find_words([word], text)
     html = u'<p>купить <span data-markers="e4ca1dc74c4a889f31a1e24bb690b5c7">пластиковые </span>'\
            u'<span data-markers="e4ca1dc74c4a889f31a1e24bb690b5c7">окна </span>в москве</p>'
     assert text.build_html() == html
@@ -50,6 +55,7 @@ def test_build_with_markers():
     # при повторной проверке уже отмаркированного списка - старые маркировки очищаются
     text = TextHtml(html)
     mark_with_words([word], text)
+    find_words([word], text)
     assert text.build_html() == html
 
 
