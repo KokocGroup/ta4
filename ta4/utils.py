@@ -50,13 +50,16 @@ def split_token(word_tokens):
             if token[i] in SENTENCES_END:
                 new_token = diff.token(token[:i+1])
                 new_token.pre_tags = token.pre_tags
+                post_tags = token.post_tags
                 if i == length - 1:
+                    # мы дошли до конца и встретили символ окончания предложения
                     new_token.post_tags = token.post_tags
                     new_token.trailing_whitespace = token.trailing_whitespace
+                    post_tags = []
                 tokens.append(new_token)
                 results.append(tokens)
                 tokens = []
-                token = diff.token(token[i+1:], post_tags=token.post_tags,
+                token = diff.token(token[i+1:], post_tags=post_tags,
                                    trailing_whitespace=token.trailing_whitespace)
                 length = len(token)
                 i = 0

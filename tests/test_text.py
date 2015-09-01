@@ -1,4 +1,6 @@
 #! coding: utf-8
+from bs4 import BeautifulSoup
+
 from ta4 import mark_with_words, find_words
 from ta4.text import TextHtml
 from ta4.sentence import Sentence
@@ -65,3 +67,23 @@ def test_build_with_ignored_tags():
     text = TextHtml(html, ignored_selectors=['h2'])
     mark_with_words([word], text)
     assert text.build_html() == html
+
+
+def test_build_html_with_ol_tags():
+    html = u''''<ol>
+    <li>
+        <p style="text-indent: 20px;">
+            <span lang="ru-RU">First item.</span>
+        </p>
+    </li>
+    <li>
+        <p style="text-indent: 20px;">
+            <span lang="ru-RU">Second item.</span>
+        </p>
+    </li>
+</ol>'''
+    text = TextHtml(html)
+    mark_with_words([], text)
+    html = text.build_html()
+    bs = BeautifulSoup(html)
+    assert len(bs.select('ol > li')) == 2, "There is two item in ordered list"
