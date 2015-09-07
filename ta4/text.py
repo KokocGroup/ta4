@@ -53,7 +53,9 @@ class TextHtml(object):
         for tokens, place_holder in deepcopy(self.structure):
             if place_holder and place_holder.markers:
                 markers = u' '.join(map(attrgetter('hash'), place_holder.markers))
-                open_tag = u'<span data-markers="%s">' % markers
+                targets = [u'target-'+h for marker in place_holder.markers for h in marker.target_sentence]
+                targets = u' '.join(targets)
+                open_tag = u'<span data-markers="%s">' % (u' '.join([markers, targets]).strip())
                 tokens[0].pre_tags.append(open_tag)
                 tokens[-1].post_tags.insert(0, u'</span>')
             html.append(u''.join(diff.expand_tokens(tokens)))

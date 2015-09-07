@@ -13,6 +13,7 @@ class Marker(object):
         self.sentence = sentence
         self.position = position
         self.is_active = False
+        self.target_sentence = set()
 
     @property
     def hash(self):
@@ -20,6 +21,9 @@ class Marker(object):
         if self.is_active:
             return marker_hash
         return "inactive-%s" % marker_hash
+
+    def simple_hash(self):
+        return hashlib.md5(self.sentence.text.encode('utf-8')).hexdigest()
 
 
 class PlaceHolder(Lexeme):

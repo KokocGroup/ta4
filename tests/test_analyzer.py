@@ -232,5 +232,5 @@ def test_asterisk_in_exact_word():
     assert additional_words == {}
     assert result[u'игры'] == 1
     assert result[u'игры [*] разработчика'] == 1
-    html = u"""<span data-markers="d203f33bb6e9ec9d0238e29d4ccfc97e">игры </span>находит, но не <span data-markers="f350ba1c1103dc72275a99ccc134dc3f inactive-d203f33bb6e9ec9d0238e29d4ccfc97e">игры </span><span data-markers="f350ba1c1103dc72275a99ccc134dc3f">русского </span><span data-markers="f350ba1c1103dc72275a99ccc134dc3f">разработчика</span>"""
+    html = u"""<span data-markers="d203f33bb6e9ec9d0238e29d4ccfc97e">игры </span>находит, но не <span data-markers="f350ba1c1103dc72275a99ccc134dc3f inactive-d203f33bb6e9ec9d0238e29d4ccfc97e target-d203f33bb6e9ec9d0238e29d4ccfc97e">игры </span><span data-markers="f350ba1c1103dc72275a99ccc134dc3f target-d203f33bb6e9ec9d0238e29d4ccfc97e">русского </span><span data-markers="f350ba1c1103dc72275a99ccc134dc3f target-d203f33bb6e9ec9d0238e29d4ccfc97e">разработчика</span>"""
     assert text.build_html() == html

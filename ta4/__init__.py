@@ -72,11 +72,22 @@ def find_words(words, text):
 
 
 def activate_marker(marker_sentence, marker, sentence):
+    inactive = []
     for placeholder in sentence.place_holders:
         if marker['min'] <= placeholder.position <= marker['max']:
             for m in placeholder.markers:
                 if m.sentence == marker_sentence:
                     m.is_active = True
+                else:
+                    inactive.append(m)
+
+    # маркируем неактивные маркеры предложением которое должно
+    for placeholder in sentence.place_holders:
+        if marker['min'] <= placeholder.position <= marker['max']:
+            for m in placeholder.markers:
+                if m.sentence == marker_sentence:
+                    for inactive_marker in inactive:
+                        m.target_sentence.add(inactive_marker.simple_hash())
 
 
 def get_markers(sentence):
