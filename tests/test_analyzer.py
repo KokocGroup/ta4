@@ -71,50 +71,21 @@ def test_mark_multiple_words():
     assert phs[7].markers[0].position == 3
 
 
-def test_group_markers():
-    markers = [
-        (Sentence(u'test1'), {'min': 0, 'max': 4}),
-        (Sentence(u'test2'), {'min': 1, 'max': 5}),
-        (Sentence(u'test3'), {'min': 1, 'max': 5}),
-        (Sentence(u'test4'), {'min': 4, 'max': 7}),
-        (Sentence(u'test5'), {'min': 9, 'max': 12}),
-        (Sentence(u'test6'), {'min': 9, 'max': 11}),
-        (Sentence(u'test7'), {'min': 10, 'max': 12}),
-        (Sentence(u'test8'), {'min': 9, 'max': 10}),
-        (Sentence(u'test9'), {'min': 11, 'max': 12})
-    ]
-    results = list(group_markers(markers))
-    assert len(results) == 2
-    assert results[0] == [markers[0], markers[1], markers[3]]
-    assert results[1] == [markers[4]]
-
-    markers = [
-        (Sentence(u'test1'), {'min': 0, 'max': 4}),
-        (Sentence(u'test2'), {'min': 5, 'max': 7}),
-        (Sentence(u'test3'), {'min': 9, 'max': 12}),
-    ]
-    results = list(group_markers(markers))
-    assert len(results) == 3
-    assert results[0] == markers[:1]
-    assert results[1] == markers[1:2]
-    assert results[2] == markers[2:]
-
-
 def test_merging_markers():
     markers = [
         (Sentence(u'test1'), {'min': 0, 'max': 0}),
-        (Sentence(u'test2'), {'min': 0, 'max': 1}),
-        (Sentence(u'test3'), {'min': 0, 'max': 0}),
+        (Sentence(u'test1 test2'), {'min': 0, 'max': 1}),
+        (Sentence(u'[test1]'), {'min': 0, 'max': 0}),
     ]
-    result = merge_filter(markers)
+    result, _ = merge_filter(markers)
     assert result == markers[:2]
 
     markers = [
-        (Sentence(u'test1'), {'min': 2, 'max': 4}),
-        (Sentence(u'test2'), {'min': 1, 'max': 5}),
-        (Sentence(u'test3'), {'min': 2, 'max': 3}),
+        (Sentence(u'c d e'), {'min': 2, 'max': 4}),
+        (Sentence(u'b c d e f'), {'min': 1, 'max': 5}),
+        (Sentence(u'c d'), {'min': 2, 'max': 3}),
     ]
-    result = merge_filter(markers)
+    result, _ = merge_filter(markers)
     assert result == markers[:2]
 
 
@@ -161,9 +132,9 @@ def test_find_words_without_intersection():
 
 def test_merge():
     test_table = [
-        ({u'окна в москве': 1, u'[купить] [окна] [москва] [недорого]': 1},
+        ({u'окна в москве': 0, u'[купить] [окна] [москва] [недорого]': 1},
          u'я бы хотел купить окна в москве недорого, и без проблем',
-         {u'ОКНА В МОСКВЕ': 1}),
+         {}),
     ]
     for task, text, new_task in test_table:
         words = map(Sentence, task.keys())
@@ -179,7 +150,7 @@ def test_find_words_with_intersections():
         (
             {u'купить пластиковые окна': 1, u'пластиковые окна в москве': 1},
             u'купить пластиковые окна в москве',
-            {u'ПЛАСТИКОВЫЕ ОКНА': 1}
+            {u'КУПИТЬ': 1}
         ),
         (
             {u'пластиковые окна': 1, u'[пластиковые] [окна]': 0},
@@ -194,14 +165,14 @@ def test_find_words_with_intersections():
             },
             u'быстро выгодно купить качественное пластиковое окно в москве',
             {
-                u'ВЫГОДНО КУПИТЬ КАЧЕСТВЕННОЕ ПЛАСТИКОВОЕ': 1,
-                u'ПЛАСТИКОВОЕ ОКНО': 1
+                u'ОКНО В МОСКВЕ': 1,
+                u'ОКНО': 1
             }
         ),
         (
-            {u'[ПОЛИЭТИЛЕНОВЫЙ] [ЗЕЛЕНЫЙ]': 1, u'[ПОЛИЭТИЛЕНОВЫЙ]': 2, u'ПОЛИЭТИЛЕНОВЫЙ': 2},
+            {u'[ПОЛИЭТИЛЕНОВЫЙ] [ЗЕЛЕНЫЙ]': 1, u'[ПОЛИЭТИЛЕНОВЫЙ]': 2, u'ПОЛИЭТИЛЕНОВЫЙ': 1},
             u"полиэтиленовый зеленый пакет болтался на дереве.Полиэтиленовый пакет. Полиэтиленовая лямка! Полиэтиленовая!",
-            {u'ПОЛИЭТИЛЕНОВЫЙ': 1}
+            {}
         ),
         (
             {u'купить пластиковые окна': 1, u'[купить] [*] [окна] [москва]': 1},

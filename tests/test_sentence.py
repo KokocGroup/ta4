@@ -58,8 +58,8 @@ def test_sorting_sentences():
         (u'купить окно', u'пластиковое окно', 0),
         (u'пластиковое окно', u'купить пластиковое окно', -1),
 
-        (u'пластиковое окно', u'[купить] [пластиковое] [окно]', 1),
-        (u'пластиковое окно', u'[купить] [*] [окно]', 1),
+        (u'пластиковое окно', u'[купить] [пластиковое] [окно]', -1),
+        (u'пластиковое окно', u'[купить] [*] [окно]', -1),
         (u'[запчасти] [грузового] [погрузчика]', u'[купить] [пластиковое] [окно]', 0),
         (u'[пластиковое] [окно]', u'[купить] [пластиковое] [окно]', -1),
 
@@ -90,6 +90,6 @@ def test_sorting_phrases():
     result = sorted(map(Sentence, phrases), cmp=phrase_cmp, reverse=True)
     result_texts = map(attrgetter('text'), result)
     assert result_texts[0] == phrases[3]
-    assert result_texts[1] == phrases[1]
-    assert result_texts[2] == phrases[2]
-    assert result_texts[3] == phrases[0]
+    assert result_texts[1] == phrases[2]
+    assert result_texts[2] == phrases[0]
+    assert result_texts[3] == phrases[1]

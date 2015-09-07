@@ -55,22 +55,18 @@ def find_words(words, text):
         markers = get_markers(sentence)
         # группируем маркеры по пересечению
         # в итоге получим кластера, которые хоть как то пересекаются
-        for markers_chunk in group_markers(markers):
+        for (markers_chunk, phantoms) in group_markers(markers):
             if len(markers_chunk) == 1:
                 # пересечений по маркерам нет
                 marker_sentence, marker = markers_chunk[0]
                 counter[marker_sentence.text] += 1
                 activate_marker(marker_sentence, marker, sentence)
             else:
-                # подсчитываем вхождения и добавляем попарное пересечение в задание
-                length = len(markers_chunk) - 1
                 for i, (marker_sentence, marker) in enumerate(markers_chunk):
                     counter[marker_sentence.text] += 1
                     activate_marker(marker_sentence, marker, sentence)
-                    if i < length:
-                        _, next_marker = markers_chunk[i+1]
-                        text = get_intersection(marker, next_marker, sentence)
-                        new_tasks[text] += 1
+                for phantom in phantoms:
+                    new_tasks[phantom] += 1
 
     return counter, dict(new_tasks)
 
@@ -119,15 +115,15 @@ def group_markers(markers):
                 # сортируем по приоритету
                 result = sorted(result, cmp=phrase_cmp, key=itemgetter(0), reverse=True)
                 # отфильтровываем поглащённые
-                result = merge_filter(result)
+                result, phantoms = merge_filter(result)
                 if result:
-                    yield result
+                    yield result, phantoms
                 max_pos = next_marker['max']
                 result = []
     result = sorted(result, cmp=phrase_cmp, key=itemgetter(0), reverse=True)
-    result = merge_filter(result)
+    result, phantoms = merge_filter(result)
     if result:
-        yield result
+        yield result, phantoms
 
 
 def merge_filter(markers):
@@ -136,15 +132,36 @@ def merge_filter(markers):
     функция выкинет маркеры, которые полностью поглощаются более приоритетными фразами
     """
     result = []
-    for i, (sentence, marker) in enumerate(markers):
-        # смотрим на предыдущие маркеры, входит ли в них i-ый
-        for _, bigger_marker in result:
-            if bigger_marker['min'] <= marker['min'] <= bigger_marker['max'] \
-               and bigger_marker['min'] <= marker['max'] <= bigger_marker['max']:
-                break
-        else:
+    phantoms = []
+    if not markers:
+        return result, phantoms
+
+    # Для группы маркеров создаём индексы доступных плейсхолдеров
+    minimum = min(map(lambda x: x[1]['min'], markers))
+    maximum = max(map(lambda x: x[1]['max'], markers))
+
+    indexes = range(minimum, maximum+1)
+    for (sentence, marker) in markers:
+        marker_borders = xrange(marker['min'], marker['max']+1)
+        free_elements = map(lambda x: x in indexes, marker_borders)
+        if all(free_elements):
+            # удалось наложить
             result.append((sentence, marker))
-    return result
+            for i in marker_borders:
+                indexes.remove(i)
+        elif any(free_elements):
+            # удалось наложить частично
+            little_phantoms = []
+            for i, value in enumerate(free_elements):
+                if value:
+                    little_phantoms.append(i)
+                elif little_phantoms:
+                    phantoms.append(' '.join([sentence.place_holders[i].word for i in little_phantoms]))
+                    little_phantoms = []
+            if little_phantoms:
+                phantoms.append(' '.join([sentence.place_holders[i].word for i in little_phantoms]))
+            result.append((sentence, marker))
+    return result, phantoms
 
 
 def get_intersection(marker, next_marker, sentence):
@@ -182,14 +199,15 @@ def phrase_cmp(one, another):
     :param one: text_analyze.sentence.Sentence
     :param another: text_analyze.sentence.Sentence
     """
-    # фраза с большим числом точных вхождений, приоритетнее
-    len_exact_cmp = cmp(one.exact_count, another.exact_count)
-    if len_exact_cmp != 0:
-        return len_exact_cmp
     # фраза с большим числом слов - приоритетнее
     len_cmp = cmp(len(one), len(another))
     if len_cmp != 0:
         return len_cmp
+
+    # фраза с большим числом точных вхождений, приоритетнее
+    len_exact_cmp = cmp(one.exact_count, another.exact_count)
+    if len_exact_cmp != 0:
+        return len_exact_cmp
 
     # для словоформ с равным числом слов, приоритетное то, где меньше звёздочек
     for spec_word in SPECIAL_WORDS:
