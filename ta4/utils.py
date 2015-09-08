@@ -8,6 +8,7 @@ from .sentence import Sentence
 from .placeholder import PlaceHolder
 
 SENTENCES_END = u'.?!'
+SENTENCES_END_TAGS = {'</p>', '</li>', '</ul>', '</ol>'}
 SPACE_REGEXP = re.compile('^(\s|&nbsp;)+$', flags=re.I | re.M)
 
 
@@ -22,6 +23,9 @@ def is_token_end(token):
 
 
 def tokens_generator(tokens):
+    u"""
+    Первоначальное разбиение на теги
+    """
     result = []
     length = len(tokens) - 1
 
@@ -73,6 +77,16 @@ def split_token(word_tokens):
     return results
 
 
+def is_sentence_end(last_token):
+
+    if last_token:
+        last_tags = set(map(str.strip, last_token.post_tags))
+        if (last_token[-1] in SENTENCES_END or
+           last_tags.intersection(SENTENCES_END_TAGS)):
+            return True
+    return False
+
+
 def get_sentences(text):
     structure = []
     sentences = []
@@ -96,7 +110,7 @@ def get_sentences(text):
             place_holders.append(place_holder)
             structure.append([tokens, place_holder])
 
-            if last_token and last_token[-1] in SENTENCES_END:
+            if is_sentence_end(last_token):
                 sentences.append(Sentence(sentence, place_holders))
                 sentence = u''
                 place_holders = []

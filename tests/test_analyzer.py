@@ -234,3 +234,18 @@ def test_asterisk_in_exact_word():
     assert result[u'игры [*] разработчика'] == 1
     html = u"""<span data-markers="d203f33bb6e9ec9d0238e29d4ccfc97e">игры </span>находит, но не <span data-markers="f350ba1c1103dc72275a99ccc134dc3f inactive-d203f33bb6e9ec9d0238e29d4ccfc97e target-d203f33bb6e9ec9d0238e29d4ccfc97e">игры </span><span data-markers="f350ba1c1103dc72275a99ccc134dc3f target-d203f33bb6e9ec9d0238e29d4ccfc97e">русского </span><span data-markers="f350ba1c1103dc72275a99ccc134dc3f target-d203f33bb6e9ec9d0238e29d4ccfc97e">разработчика</span>"""
     assert text.build_html() == html
+
+
+def test_html_lists():
+    text = u"""
+    <p>Виды имплантации зубов:</p>
+    <ul>
+        <li>Базальная имплантация</li>
+    </ul>
+    <p>Имплантация зубов имеет разные технологии.</p>
+    """
+    text = TextHtml(text)
+    words = map(Sentence, [u'[имплантация] [*] [зубов]', u'базальная имплантация'])
+    mark_with_words(words, text)
+    result, additional_words = find_words(words, text)
+    assert result == {u'[имплантация] [*] [зубов]': 0, u'базальная имплантация': 1}
