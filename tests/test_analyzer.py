@@ -250,3 +250,35 @@ def test_html_lists():
     mark_with_words(words, text)
     result, additional_words = find_words(words, text)
     assert result == task
+
+
+def test_punctuation_positive():
+    words = [Sentence(u'знаки препинания')]
+    text = TextHtml(u"""
+    <p>знаки – препинания</p>
+    <p>знаки, препинания</p>
+    <p>знаки: препинания</p>
+    <p>знаки (препинания</p>
+    <p>знаки; препинания</p>
+    <p>знаки "препинания</p>
+    """)
+    task = {u'знаки препинания': 6}
+    mark_with_words(words, text)
+    result, additional_words = find_words(words, text)
+    assert result == task
+
+
+def test_punctuation_negative():
+    words = [Sentence(u'знаки препинания')]
+    text = TextHtml(u"""
+    <p>знаки-препинания</p>
+    <p>знаки. препинания</p>
+    <p>знаки! препинания</p>
+    <p>знаки? препинания</p>
+    <p><span><span>знаки</span></span></p>
+    <p><span><span>препинания</span></span></p>
+    """)
+    task = {u'знаки препинания': 0}
+    mark_with_words(words, text)
+    result, additional_words = find_words(words, text)
+    assert result == task

@@ -63,6 +63,10 @@ class Lexeme(object):
         return self.origin_word in SPECIAL_WORDS
 
     @property
+    def is_word(self):
+        return self.origin_word not in {u'–'}
+
+    @property
     def is_important(self):
         u"""Не важная часть речи, например предлоги или частицы, не учавствуют в сравнениях"""
         if self.is_special:

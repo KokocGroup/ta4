@@ -4,7 +4,7 @@ from operator import attrgetter
 
 class ExactAnalyzer(object):
     def get_sentence_placeholders(self, sentence):
-        return sentence.place_holders
+        return filter(attrgetter('is_word'), sentence.place_holders)
 
     def mark(self, keyword, sentence, number):
         placeholders = self.get_sentence_placeholders(sentence)
@@ -28,7 +28,8 @@ class ExactAnalyzer(object):
 
 class SubformsAnalyzer(ExactAnalyzer):
     def get_sentence_placeholders(self, sentence):
-        return filter(attrgetter('is_important'), sentence.place_holders)
+        place_holders = super(SubformsAnalyzer, self).get_sentence_placeholders(sentence)
+        return filter(attrgetter('is_important'), place_holders)
 
     def equals(self, ph, other):
         u"""
