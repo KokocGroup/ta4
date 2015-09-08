@@ -245,7 +245,8 @@ def test_html_lists():
     <p>Имплантация зубов имеет разные технологии.</p>
     """
     text = TextHtml(text)
-    words = map(Sentence, [u'[имплантация] [*] [зубов]', u'базальная имплантация'])
+    task = {u'[имплантация] [*] [зубов]': 0, u'базальная имплантация': 1}
+    words = map(Sentence, task.keys())
     mark_with_words(words, text)
     result, additional_words = find_words(words, text)
-    assert result == {u'[имплантация] [*] [зубов]': 0, u'базальная имплантация': 1}
+    assert result == task
