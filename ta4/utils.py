@@ -78,7 +78,6 @@ def split_token(word_tokens):
 
 
 def is_sentence_end(last_token):
-
     if last_token:
         last_tags = set(map(str.strip, last_token.post_tags))
         if (last_token[-1] in SENTENCES_END or
@@ -87,11 +86,19 @@ def is_sentence_end(last_token):
     return False
 
 
+def is_sentence_begin(first_token):
+    if first_token:
+        pre_tags = set(map(str.strip, first_token.pre_tags))
+        if pre_tags.intersection({u'<br>', u'</br>'}):
+            return True
+    return False
+
+
 def get_sentences(text):
     structure = []
     sentences = []
-    sentence = u''
     place_holders = []
+    sentence = u''
     tokens = diff.tokenize(text)
     position = 0
     for word_tokens in tokens_generator(tokens):
@@ -102,10 +109,14 @@ def get_sentences(text):
         for tokens in split_token(word_tokens):
             word = u''.join(map(unicode, tokens))
             word = word.rstrip(SENTENCES_END)
+            first_token = tokens[0]
+            if is_sentence_begin(first_token):
+                sentences.append(Sentence(sentence, place_holders))
+                sentence = u''
+                place_holders = []
 
             last_token = tokens[-1]
             sentence += word + last_token.trailing_whitespace
-
             place_holder = PlaceHolder(word, position)
             place_holders.append(place_holder)
             structure.append([tokens, place_holder])

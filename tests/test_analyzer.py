@@ -1,5 +1,5 @@
 #! coding: utf-8
-from ta4 import mark_with_words, find_words, group_markers, merge_filter
+from ta4 import mark_with_words, find_words, merge_filter
 from ta4.text import TextHtml
 from ta4.sentence import Sentence
 
@@ -279,6 +279,19 @@ def test_punctuation_negative():
     <p><span><span>препинания</span></span></p>
     """)
     task = {u'знаки препинания': 0}
+    mark_with_words(words, text)
+    result, additional_words = find_words(words, text)
+    assert result == task
+
+
+def test_paragraph_break():
+    text = TextHtml(u"""
+    <p style="text-indent: 20px;">Дентальная&nbsp;<span data-markers="badef16d17cb3f15a6eae4e11b39ef9b" class="highlightedText">имплантация</span><br>Бескровная&nbsp;<span data-markers="badef16d17cb3f15a6eae4e11b39ef9b" class="highlightedText">имплантация</span><br>Лазерная&nbsp;<span data-markers="badef16d17cb3f15a6eae4e11b39ef9b" class="highlightedText">имплантация</span><br>Базальная&nbsp;<span data-markers="68d827caec2e46d49ea561212476052f inactive-badef16d17cb3f15a6eae4e11b39ef9b target-f7cf930ddf8a402b1c0d559e97932ad6 target-7bc22675ef51be0fb916f66f8b61013f target-badef16d17cb3f15a6eae4e11b39ef9b target-1ec1ca7a93460e9f12d8c84116914067" class="highlightedText">имплантация</span><br><br></p>
+    <p style="text-indent: 20px;"><span data-markers="68d827caec2e46d49ea561212476052f inactive-7bc22675ef51be0fb916f66f8b61013f inactive-badef16d17cb3f15a6eae4e11b39ef9b target-f7cf930ddf8a402b1c0d559e97932ad6 target-7bc22675ef51be0fb916f66f8b61013f target-badef16d17cb3f15a6eae4e11b39ef9b target-1ec1ca7a93460e9f12d8c84116914067" class="highlightedText">Имплантация</span>&nbsp;<span data-markers="68d827caec2e46d49ea561212476052f inactive-1ec1ca7a93460e9f12d8c84116914067 inactive-f7cf930ddf8a402b1c0d559e97932ad6 inactive-7bc22675ef51be0fb916f66f8b61013f target-f7cf930ddf8a402b1c0d559e97932ad6 target-7bc22675ef51be0fb916f66f8b61013f target-badef16d17cb3f15a6eae4e11b39ef9b target-1ec1ca7a93460e9f12d8c84116914067" class="highlightedText">зубов</span>&nbsp;имеет разные технологии. Выбор определяет состояние костной ткани и дёсен пациента; место, где расположен&nbsp;<span data-markers="1ec1ca7a93460e9f12d8c84116914067" class="highlightedText">зуб;</span>&nbsp;количество&nbsp;<span data-markers="inactive-1ec1ca7a93460e9f12d8c84116914067 f7cf930ddf8a402b1c0d559e97932ad6 target-1ec1ca7a93460e9f12d8c84116914067" class="highlightedText">зубов</span>&nbsp;для восстановления; период времени, прошедший с момента потери&nbsp;<span data-markers="1ec1ca7a93460e9f12d8c84116914067" class="highlightedText">зуба.</span>&nbsp;Выбор технологии&nbsp;<span data-markers="7bc22675ef51be0fb916f66f8b61013f inactive-badef16d17cb3f15a6eae4e11b39ef9b inactive-7d63159b48a8683402e56a8fcc4cb772 target-f7cf930ddf8a402b1c0d559e97932ad6 target-7d63159b48a8683402e56a8fcc4cb772 target-badef16d17cb3f15a6eae4e11b39ef9b target-1ec1ca7a93460e9f12d8c84116914067" class="highlightedText">имплантации</span>&nbsp;<span data-markers="inactive-1ec1ca7a93460e9f12d8c84116914067 inactive-f7cf930ddf8a402b1c0d559e97932ad6 7bc22675ef51be0fb916f66f8b61013f target-f7cf930ddf8a402b1c0d559e97932ad6 target-7d63159b48a8683402e56a8fcc4cb772 target-badef16d17cb3f15a6eae4e11b39ef9b target-1ec1ca7a93460e9f12d8c84116914067" class="highlightedText">зубов</span>&nbsp;предварительно осуществляется при первичном осмотре и окончательно — по результатам компьютерной диагностики.</p>
+    """)
+
+    task = {u'[имплантация] [*] [зубов]': 0}
+    words = map(Sentence, task.keys())
     mark_with_words(words, text)
     result, additional_words = find_words(words, text)
     assert result == task
