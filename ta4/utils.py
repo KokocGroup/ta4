@@ -110,7 +110,7 @@ def get_sentences(text):
             word = u''.join(map(unicode, tokens))
             word = word.rstrip(SENTENCES_END)
             first_token = tokens[0]
-            if is_sentence_begin(first_token):
+            if is_sentence_begin(first_token) and place_holders:
                 sentences.append(Sentence(sentence, place_holders))
                 sentence = u''
                 place_holders = []
