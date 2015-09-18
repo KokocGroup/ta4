@@ -4,6 +4,7 @@ python:
 install:
   - pip install -U -r requirements.txt
   - pip install coveralls
+  - pip install pytest-cov
   - pip install .
-script: py.test
+script: py.test --cov=ta4
 after_success: coveralls
