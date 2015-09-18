@@ -1,12 +1,11 @@
 from fabric.api import local, task, quiet
 
 
-def increment_version(index):
+def change_version(change):
     version_row = local("grep 'VERSION = ' setup.py", capture=True)
     version = version_row.split(' = ')[1].strip()
-    version = version[1:-1].split('.')
-    version[index] = str(int(version[index]) + 1)
-    new_version = '.'.join(version)
+    version = map(int, version[1:-1].split('.'))
+    new_version = '.'.join(map(str, change(*version)))
     local("sed -isetup.py 's/VERSION =.*/VERSION = \"{}\"/g' setup.py".format(new_version))
     return new_version
 
@@ -22,14 +21,14 @@ def release(new_version):
 
 @task
 def major():
-    release(increment_version(0))
+    release(change_version(lambda x, y, z: [x+1, 0, 0]))
 
 
 @task
 def minor():
-    release(increment_version(1))
+    release(change_version(lambda x, y, z: [x, y+1, 0]))
 
 
 @task
 def patch():
-    release(increment_version(2))
+    release(change_version(lambda x, y, z: [x, y, z+1]))
