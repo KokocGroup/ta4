@@ -24,9 +24,12 @@ class ExactAnalyzer(object):
                         if meaning_word == 2 or i == len(placeholders) - j - 1:
                             i -= 1
                             skipped_words -= 1
+                            meaning_word -= 1
                             break
                         i += 1
                         skipped_words += 1
+                    if not meaning_word:
+                        break
                 else:
                     if not self.equals(ph, placeholders[i+j]):
                         break
