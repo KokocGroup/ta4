@@ -9,17 +9,34 @@ class ExactAnalyzer(object):
     def mark(self, keyword, sentence, number):
         placeholders = self.get_sentence_placeholders(sentence)
         stop = len(placeholders) - len(keyword.place_holders)
-        for i in xrange(len(placeholders)):
+        i = 0
+        while i < len(placeholders):
             if i > stop:
                 break
+            skipped_words = 0
             for j, ph in enumerate(keyword.place_holders):
-                if not self.equals(ph, placeholders[i+j]):
-                    break
+                if ph.is_special:
+                    meaning_word = 0
+                    while True:
+                        if placeholders[i+j].is_important:
+                            meaning_word += 1
+                        # если встретили уже второе значимое слово
+                        if meaning_word == 2 or i == len(placeholders) - j - 1:
+                            i -= 1
+                            skipped_words -= 1
+                            break
+                        i += 1
+                        skipped_words += 1
+                else:
+                    if not self.equals(ph, placeholders[i+j]):
+                        break
             else:
-                while j >= 0:
-                    placeholders[i+j].add_marker(j, keyword, number)
-                    j -= 1
+                words_count = j + skipped_words
+                while words_count >= 0:
+                    placeholders[i-skipped_words+words_count].add_marker(words_count, keyword, number)
+                    words_count -= 1
                 number += 1
+            i += 1
         return number
 
     def equals(self, ph, other):

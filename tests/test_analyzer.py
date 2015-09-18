@@ -296,3 +296,19 @@ def test_paragraph_break():
     mark_with_words(words, text)
     result, additional_words = find_words(words, text)
     assert result == task
+
+
+def test_analyze_asterisk():
+    words = [Sentence(u'услуги * квартир')]
+    text = TextHtml(u"""
+    <li>услуги по ремонту квартир</li>
+    <li>услуги отделки для квартир</li>
+    <li>услуги по уборке для квартир более 100 кв метров</li>
+
+    <li>услуги для уборки в роскошной квартире</li>
+    <li>услуги в квартире</li>
+    <li>услуги квартире</li>
+    """)
+    mark_with_words(words, text)
+    result, additional_words = find_words(words, text)
+    assert result[u'услуги * квартир'] == 3
