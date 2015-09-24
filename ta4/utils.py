@@ -79,7 +79,7 @@ def split_token(word_tokens):
 
 def is_sentence_end(last_token):
     if last_token:
-        last_tags = set(map(str.strip, last_token.post_tags))
+        last_tags = set(map(lambda x: unicode(x).strip(), last_token.post_tags))
         if (last_token[-1] in SENTENCES_END or
            last_tags.intersection(SENTENCES_END_TAGS)):
             return True
