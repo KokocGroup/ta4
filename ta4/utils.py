@@ -88,7 +88,7 @@ def is_sentence_end(last_token):
 
 def is_sentence_begin(first_token):
     if first_token:
-        pre_tags = set(map(str.strip, first_token.pre_tags))
+        pre_tags = set(map(lambda x: unicode(x).strip(), first_token.pre_tags))
         if pre_tags.intersection({u'<br>', u'</br>'}):
             return True
     return False
