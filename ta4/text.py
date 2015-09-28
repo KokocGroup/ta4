@@ -28,6 +28,7 @@ class TextHtml(object):
         for element in self.bs.findAll(attrs={'data-markers': True}):
             element.unwrap()
 
+        self.text_after_replacement = unicode(self.bs)
         self.structure, self.sentences = get_sentences(unicode(self.bs))
 
     def __iter__(self):
@@ -38,7 +39,7 @@ class TextHtml(object):
         return len(self.sentences)
 
     def __repr__(self):
-        return self.text.encode('utf-8')
+        return self.text_after_replacement.encode('utf-8')
 
     def prepare_html(self, html):
         return html.replace('<br>', '<br/>').replace('<hr>', '<hr/>').replace('</br>', '')\

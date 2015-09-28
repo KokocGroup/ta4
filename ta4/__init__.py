@@ -66,7 +66,7 @@ def find_words(words, text):
                     counter[marker_sentence.text] += 1
                     activate_marker(marker_sentence, marker, sentence)
                 for phantom in phantoms:
-                    new_tasks[phantom] += 1
+                    new_tasks[phantom.lower()] += 1
 
     return counter, dict(new_tasks)
 
@@ -155,11 +155,9 @@ def merge_filter(markers):
     for (sentence, marker) in markers:
         marker_borders = xrange(marker['min'], marker['max']+1)
         free_elements = map(lambda x: x in indexes, marker_borders)
+        # если удалось наложить фразу на плейсхолдеры без конфликтов
         if all(free_elements):
-            # удалось наложить
             result.append((sentence, marker))
-            for i in marker_borders:
-                indexes.remove(i)
         elif any(free_elements):
             # удалось наложить частично
             little_phantoms = []
@@ -172,6 +170,13 @@ def merge_filter(markers):
             if little_phantoms:
                 phantoms.append(' '.join([sentence.place_holders[i].word for i in little_phantoms]))
             result.append((sentence, marker))
+        else:
+            phantoms.append(sentence.text)
+
+        for i in marker_borders:
+            if i in indexes:
+                indexes.remove(i)
+
     return result, phantoms
 
 
