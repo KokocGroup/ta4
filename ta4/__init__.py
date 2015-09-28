@@ -162,7 +162,7 @@ def merge_filter(markers):
             # удалось наложить частично
             little_phantoms = []
             for i, value in enumerate(free_elements):
-                if value:
+                if not value:
                     little_phantoms.append(i)
                 elif little_phantoms:
                     phantoms.append(' '.join([sentence.place_holders[i].word for i in little_phantoms]))
