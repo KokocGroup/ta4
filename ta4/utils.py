@@ -79,7 +79,7 @@ def split_token(word_tokens):
 
 def is_sentence_end(last_token):
     if last_token:
-        last_tags = set(map(str.strip, last_token.post_tags))
+        last_tags = set(map(unicode.strip, map(unicode, last_token.post_tags)))
         if (last_token[-1] in SENTENCES_END or
            last_tags.intersection(SENTENCES_END_TAGS)):
             return True
@@ -88,7 +88,7 @@ def is_sentence_end(last_token):
 
 def is_sentence_begin(first_token):
     if first_token:
-        pre_tags = set(map(str.strip, first_token.pre_tags))
+        pre_tags = set(map(unicode.strip, map(unicode, first_token.pre_tags)))
         if pre_tags.intersection({u'<br>', u'</br>'}):
             return True
     return False
