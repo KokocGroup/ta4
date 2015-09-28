@@ -170,8 +170,6 @@ def merge_filter(markers):
             if little_phantoms:
                 phantoms.append(' '.join([sentence.place_holders[i].word for i in little_phantoms]))
             result.append((sentence, marker))
-        else:
-            phantoms.append(sentence.text)
 
         for i in marker_borders:
             if i in indexes:
