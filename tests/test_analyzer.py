@@ -343,3 +343,18 @@ def test_some_text():
     assert result[u'[КОФЕМАШИН] [*] [ПРОСПЕКТ]'] == 2
     assert result[u'вернадского'] == 1
     assert u'вернадского' not in additional_words
+
+
+def test_word_good():
+    text = TextHtml(u"""
+        А наша компания поможет вам с выбором лучшего санатория или пансионата.
+        Рейтинг лучших санаторно-курортных комплексов вы можете увидеть на нашем сайте.
+    """, ignored_selectors=[u'title', u'h1', u'h2', u'h3', u'span.ice-del'])
+    words = map(Sentence, [
+        u'[ХОРОШИЙ]',
+        u'[ЛУЧШИЙ]',
+    ])
+    mark_with_words(words, text)
+    result, additional_words = find_words(words, text)
+    assert result[u'[ХОРОШИЙ]'] == 0
+    assert result[u'[ЛУЧШИЙ]'] == 2

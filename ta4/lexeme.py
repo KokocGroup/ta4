@@ -45,6 +45,10 @@ class GramInfo(object):
 
 
 def get_gram_infos(word):
+    # пока так неэлегантно, но увы
+    if word.lower().startswith(u'лучш'):
+        return [GramInfo(u'лучший', u'ADJF')]
+
     results = morph.parse(word)
     return [GramInfo(r.normal_form, r.tag.POS) for r in results]
 
