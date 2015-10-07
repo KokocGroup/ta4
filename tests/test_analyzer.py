@@ -358,3 +358,15 @@ def test_word_good():
     result, additional_words = find_words(words, text)
     assert result[u'[ХОРОШИЙ]'] == 0
     assert result[u'[ЛУЧШИЙ]'] == 2
+
+
+def test_word_child():
+    text = TextHtml(u"Дети наше будующее! Ребёнок не должен оставаться дома один")
+    words = map(Sentence, [
+        u'[ДЕТИ]',
+        u'[РЕБЁНОК]',
+    ])
+    mark_with_words(words, text)
+    result, additional_words = find_words(words, text)
+    assert result[u'[ДЕТИ]'] == 1
+    assert result[u'[РЕБЁНОК]'] == 1
