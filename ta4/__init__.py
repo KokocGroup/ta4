@@ -160,10 +160,12 @@ def merge_filter(markers):
             result.append((sentence, marker))
         elif any(free_elements):
             # удалось наложить частично
+            length = len(sentence.place_holders)
             little_phantoms = []
             for i, value in enumerate(free_elements):
                 if not value:
-                    little_phantoms.append(i)
+                    if i < length:
+                        little_phantoms.append(i)
                 elif little_phantoms:
                     phantoms.append(' '.join([sentence.place_holders[i].word for i in little_phantoms]))
                     little_phantoms = []
