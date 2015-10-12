@@ -72,6 +72,9 @@ def split_token(word_tokens):
         if len(token) == 0 and not token.pre_tags and not token.post_tags:
             continue
         tokens.append(token)
+        if is_sentence_end(token):
+            results.append(tokens)
+            tokens = []
     if tokens:
         results.append(tokens)
     return results

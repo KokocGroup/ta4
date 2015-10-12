@@ -370,3 +370,14 @@ def test_word_child():
     result, additional_words = find_words(words, text)
     assert result[u'[ДЕТИ]'] == 1
     assert result[u'[РЕБЁНОК]'] == 1
+
+
+def test_html_with_strong():
+    text = TextHtml(u"<p>Екарта для Екатеринбурга</p><p>Карту для оплаты проезда.</p>")
+    assert len(text.sentences) == 2
+    words = map(Sentence, [
+        u'карту'
+    ])
+    mark_with_words(words, text)
+    result, additional_words = find_words(words, text)
+    assert result[u'карту'] == 1
