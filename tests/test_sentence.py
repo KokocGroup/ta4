@@ -1,20 +1,21 @@
 #! coding: utf-8
 from operator import attrgetter
 
+import pytest
+
 from ta4 import phrase_cmp
 from ta4.sentence import Sentence
 from ta4.lexeme import Lexeme,  get_gram_infos
 
 
-def test_creation():
-    test_table = [
-        (u"Это обычный текст", 3),
-        (u"Это обычный - текст", 4),
-    ]
-    for text, length in test_table:
-        sentence = Sentence(text)
-        assert sentence.text == text
-        assert len(sentence) == length
+@pytest.mark.parametrize("text,length", [
+    (u"Это обычный текст", 3),
+    (u"Это обычный - текст", 4),
+])
+def test_creation(text, length):
+    sentence = Sentence(text)
+    assert sentence.text == text
+    assert len(sentence) == length
 
 
 def test_creation_subform_sentence():
@@ -24,59 +25,55 @@ def test_creation_subform_sentence():
     assert all([ph.is_subform_word for ph in sentence.place_holders]), True
 
 
-def test_lexeme_is_important():
-    test_table = [
-        (u'[*]', False, True),
-        (u'*', False, True),
-        (u'в', False, False),
-        (u'машина', True, False),
-        (u'для', False, False),
-        (u'при', False, False),
-        (u'окна', True, False),
-        (u'пластиковые', True, False),
-    ]
-    for word, is_important, is_special in test_table:
-        lexeme = Lexeme(word)
-        assert lexeme.is_important == is_important
-        assert lexeme.is_special == is_special
+@pytest.mark.parametrize("word,is_important,is_special", [
+    (u'[*]', False, True),
+    (u'*', False, True),
+    (u'в', False, False),
+    (u'машина', True, False),
+    (u'для', False, False),
+    (u'при', False, False),
+    (u'окна', True, False),
+    (u'пластиковые', True, False),
+])
+def test_lexeme_is_important(word, is_important, is_special):
+    lexeme = Lexeme(word)
+    assert lexeme.is_important == is_important
+    assert lexeme.is_special == is_special
 
 
-def test_get_gram_infos():
-    test_table = [
-        (u'машина', 4),
-        (u'окно', 2),
-        (u'двигать', 1),
-    ]
-    for word, counter in test_table:
-        gram_info = get_gram_infos(word)
-        assert len(gram_info) == counter
+@pytest.mark.parametrize("word,counter", [
+    (u'машина', 4),
+    (u'окно', 2),
+    (u'двигать', 1),
+])
+def test_get_gram_infos(word, counter):
+    gram_info = get_gram_infos(word)
+    assert len(gram_info) == counter
 
 
-def test_sorting_sentences():
-    test_table = [
-        (u'купить пластиковое окно', u'пластиковое окно', 1),
-        (u'купить окно', u'пластиковое окно', 0),
-        (u'пластиковое окно', u'купить пластиковое окно', -1),
+@pytest.mark.parametrize("one,another,result", [
+    (u'купить пластиковое окно', u'пластиковое окно', 1),
+    (u'купить окно', u'пластиковое окно', 0),
+    (u'пластиковое окно', u'купить пластиковое окно', -1),
 
-        (u'пластиковое окно', u'[купить] [пластиковое] [окно]', -1),
-        (u'пластиковое окно', u'[купить] [*] [окно]', -1),
-        (u'[запчасти] [грузового] [погрузчика]', u'[купить] [пластиковое] [окно]', 0),
-        (u'[пластиковое] [окно]', u'[купить] [пластиковое] [окно]', -1),
+    (u'пластиковое окно', u'[купить] [пластиковое] [окно]', -1),
+    (u'пластиковое окно', u'[купить] [*] [окно]', -1),
+    (u'[запчасти] [грузового] [погрузчика]', u'[купить] [пластиковое] [окно]', 0),
+    (u'[пластиковое] [окно]', u'[купить] [пластиковое] [окно]', -1),
 
-        (u'[пластиковое] [*] [окно]', u'[купить] [пластиковое] [окно]', -1),
-        (u'[купить] [пластиковое] [*] [окно]', u'[купить] [пластиковое] [окно]', 1),
-        (u'[пластиковое] [*] [окно]', u'[запчасти] [*] [погрузчика]', 0),
+    (u'[пластиковое] [*] [окно]', u'[купить] [пластиковое] [окно]', -1),
+    (u'[купить] [пластиковое] [*] [окно]', u'[купить] [пластиковое] [окно]', 1),
+    (u'[пластиковое] [*] [окно]', u'[запчасти] [*] [погрузчика]', 0),
 
-        (u'окна', u'купить [*] окна', -1),
-        (u'купить окна', u'купить [*] окна', -1),
-        (u'купить окна', u'купить [*] окна в москве', -1),
-        (u'купить [*] окна', u'купить [*] окна в москве', -1),
-        (u'купить * шар', u'купить зеленый шар', -1),
-    ]
-
-    for one, another, result in test_table:
-        one, another = Sentence(one), Sentence(another)
-        assert phrase_cmp(one, another) == result
+    (u'окна', u'купить [*] окна', -1),
+    (u'купить окна', u'купить [*] окна', -1),
+    (u'купить окна', u'купить [*] окна в москве', -1),
+    (u'купить [*] окна', u'купить [*] окна в москве', -1),
+    (u'купить * шар', u'купить зеленый шар', -1),
+])
+def test_sorting_sentences(one, another, result):
+    one, another = Sentence(one), Sentence(another)
+    assert phrase_cmp(one, another) == result
 
 
 def test_sorting_phrases():
