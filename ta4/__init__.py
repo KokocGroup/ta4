@@ -71,6 +71,17 @@ def find_words(words, text):
     return counter, dict(new_tasks)
 
 
+def get_marked_words(text):
+    u"""
+    Из размеченного текста вернёт слова которые в нём размечены и количество вхождений
+    """
+    mapping = defaultdict(int)
+    for sentence in text:
+        for keyword, _ in get_markers(sentence):
+            mapping[keyword.text] += 1
+    return dict(mapping)
+
+
 def activate_marker(marker_sentence, marker, sentence):
     inactive = []
     for placeholder in sentence.place_holders:

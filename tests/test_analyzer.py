@@ -1,7 +1,7 @@
 #! coding: utf-8
 import pytest
 
-from ta4 import mark_with_words, find_words, merge_filter
+from ta4 import mark_with_words, find_words, merge_filter, get_marked_words
 from ta4.text import TextHtml
 from ta4.sentence import Sentence
 
@@ -378,3 +378,17 @@ def test_html_with_strong():
     mark_with_words(words, text)
     result, additional_words = find_words(words, text)
     assert result[u'карту'] == 1
+
+
+def test_get_marked_words():
+    text = TextHtml(u"Купить пластиковые окна в москве и не дорого. Деревянные окна под заказ")
+    original_words = [
+        u'купить * окна',
+        u'пластиковые окна в москве',
+        u'деревянные окна',
+    ]
+    words = map(Sentence, original_words)
+    mark_with_words(words, text)
+    marked = get_marked_words(text)
+    for word in original_words:
+        assert marked[word] == 1

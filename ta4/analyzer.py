@@ -16,6 +16,7 @@ class ExactAnalyzer(object):
             skipped_words = 0
             for j, ph in enumerate(keyword.place_holders):
                 if ph.is_special:
+                    # * - пропустить только одно значимое слово(и сколько угодно не значимых)
                     meaning_word = 0
                     while True:
                         if placeholders[i+j].is_important:
