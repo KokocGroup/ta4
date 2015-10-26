@@ -70,3 +70,8 @@ class TextHtml(object):
             if tag:
                 tag.replace_with(original_tag)
         return unicode(html).replace(u"<nbsp></nbsp>", u"\xa0")
+
+    def remove_markers(self):
+        for sentence in self:
+            for ph in sentence.place_holders:
+                ph.clean()

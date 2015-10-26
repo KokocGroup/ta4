@@ -37,3 +37,6 @@ class PlaceHolder(Lexeme):
     def add_marker(self, position, word, marker_id):
         marker = Marker(word, position, marker_id)
         self.markers.append(marker)
+
+    def clean(self):
+        self.markers = []

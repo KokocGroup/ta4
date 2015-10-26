@@ -1,7 +1,7 @@
 #! coding: utf-8
 from bs4 import BeautifulSoup
 
-from ta4 import mark_with_words, find_words
+from ta4 import mark_with_words, find_words, get_marked_words
 from ta4.text import TextHtml
 from ta4.sentence import Sentence
 
@@ -87,3 +87,12 @@ def test_build_html_with_ol_tags():
     html = text.build_html()
     bs = BeautifulSoup(html)
     assert len(bs.select('ol > li')) == 2, "There is two item in ordered list"
+
+
+def test_clean_markers():
+    text = TextHtml(u'купить пластиковые окна')
+    mark_with_words([Sentence(u'купить пластиковые')], text)
+    text.remove_markers()
+    mark_with_words([Sentence(u'пластиковые окна')], text)
+    counters = get_marked_words(text)
+    assert len(counters) == 1
