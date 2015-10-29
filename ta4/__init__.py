@@ -134,6 +134,8 @@ def get_whole_markers(words):
     """
     Находим маркерные пятна - непрерывные куски промаркированных слов
     """
+    if not words:
+        return []
     in_group = bool(words[0].markers)
     groups = []
     current_group = None
