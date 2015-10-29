@@ -7,6 +7,7 @@ import nltk
 import pymorphy2
 
 from .analyzer import ExactAnalyzer, SubformsAnalyzer
+from .sentence import Sentence
 
 
 morph = pymorphy2.MorphAnalyzer()
@@ -80,6 +81,82 @@ def get_marked_words(text):
         for keyword, _ in get_markers(sentence):
             mapping[keyword.text] += 1
     return dict(mapping)
+
+
+def find_similar_phrases(phrases, text):
+    u"""
+    Находит похожие фразы. Если в предложении мы встретили какое нибудь слово из фраз,
+    то мы нарезаем это предложение на фразы. Максимальный промежуток между вхождениями
+    одно значимое слово
+
+    Например
+    для текста: Я хотел бы купить пластиковые окна в кредит недорого.
+    и ключевых слов: "хотел", "пластиковые окна", "недорого"
+
+    Мы должны сгенерировать дополнительные фразы:
+    "хотел * пластиковые"
+    "хотел * пластиковые окна"
+    "пластиковые окна * недорого"
+    "окна * недорого"
+    """
+    words = [Sentence(word.word) for phrase in phrases for word in phrase]
+    new_phrases = []
+    mark_with_words(words, text)
+    for sentence in text:
+        # делаем обратный маппинг - позиция в предложении на диапазон его маркера
+        # TODO маркера не подойдут - ведь возможно пересечение!!
+        words = [ph for ph in sentence if ph.is_important]
+
+        mapping = {}
+        for marker in map(itemgetter(1), get_markers(sentence)):
+            for i in xrange(marker['min'], marker['max']+1):
+                mapping[i] = marker
+
+        # находим слово без маркеров, но что бы слева и справа стояли слова с маркерами
+        for i, word in enumerate(words[1:-1], 1):
+            if not word.markers and words[i-1].markers and words[i+1].markers:
+                left = mapping[i-1]['min']
+                right = mapping[i+1]['max']
+                # left_marker(left, i-1), *, right_marker(i+1, right)
+                for k in range(left, i):
+                    for l in range(i+1, right+1):
+                        phrase = []
+                        for x in range(k, l+1):
+                            if x != i:
+                                phrase.append(words[x].word)
+                            else:
+                                phrase.append(u'*')
+                        new_phrases.append(u" ".join(phrase))
+    return new_phrases
+
+
+def get_whole_markers(words):
+    """
+    Находим маркерные пятна - непрерывные куски промаркированных словs
+    """
+    in_group = bool(words[0].markers)
+    groups = []
+    current_group = None
+    if in_group:
+        current_group = [0, 0]
+    for i, word in enumerate(words):
+        is_marker = bool(word.markers)
+        if is_marker and not current_group:
+            current_group = [i, i]
+
+        if not is_marker and in_group:
+            groups.append(current_group)
+            current_group = None
+        else:
+            if in_group and is_marker:
+                current_group[1] = i
+
+        in_group = is_marker
+    else:
+        if current_group:
+            groups.append(current_group)
+
+    return groups
 
 
 def activate_marker(marker_sentence, marker, sentence):

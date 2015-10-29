@@ -17,6 +17,10 @@ class Sentence(object):
     def __repr__(self):
         return self.text.encode('utf-8')
 
+    def __iter__(self):
+        for ph in self.place_holders:
+            yield ph
+
     @property
     def is_exact_task(self):
         """
