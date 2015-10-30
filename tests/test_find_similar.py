@@ -6,21 +6,29 @@ from ta4.text import TextHtml
 from ta4.sentence import Sentence
 
 
-def test_find_similar_phrases():
-    text = TextHtml(u'Я хотел бы купить пластиковые окна в кредит недорого')
-    words = map(Sentence, [
-        u'хотел',
-        u'недорого',
-        u'пластиковые окна',
-    ])
+@pytest.mark.parametrize("text, words, expected", [
+    (
+        u'Я хотел бы купить пластиковые окна в кредит недорого',
+         [u'хотел', u'недорого', u'пластиковые окна'],
+         [u"хотел * пластиковые", u"хотел * пластиковые окна", u"пластиковые окна * недорого", u"окна * недорого"]
+    ),
+    (
+        u'Я хотел бы купить пластиковые окна в кредит недорого',
+         [u'хотел', u'пластиковые окна'],
+         [u"хотел * пластиковые", u"хотел * пластиковые окна"]
+    ),
+    (
+        u'Я хотел бы купить пластиковые окна в кредит недорого',
+         [u'пластиковые окна'],
+         []
+    ),
+])
+def test_find_similar_phrases(text, words, expected):
+    text = TextHtml(text)
+    words = map(Sentence, words)
     new_phrases = find_similar_phrases(words, text)
-    assert len(new_phrases) > 0
-    assert set(new_phrases) == set([
-        u"хотел * пластиковые",
-        u"хотел * пластиковые окна",
-        u"пластиковые окна * недорого",
-        u"окна * недорого",
-    ])
+    assert len(new_phrases) == len(expected)
+    assert set(new_phrases) == set(expected)
 
 
 class Word(object):
@@ -29,7 +37,7 @@ class Word(object):
         self.markers = markers
 
 
-@pytest.mark.parametrize("input,expected", [
+@pytest.mark.parametrize("input, expected", [
     ([('A', True), ('A', False), ('A', True), ('A', True)], [[0, 0], [2, 3]]),
     ([('A', True), ('A', True), ('A', True), ('A', True)], [[0, 3]]),
     ([], []),
