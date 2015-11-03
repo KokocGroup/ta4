@@ -37,14 +37,14 @@ class ExactAnalyzer(object):
             else:
                 words_count = j + skipped_words
                 while words_count >= 0:
-                    placeholders[i-skipped_words+words_count].add_marker(words_count, keyword, number)
+                    placeholders[i-skipped_words+words_count].add_marker(keyword, words_count, number)
                     words_count -= 1
                 number += 1
             i += 1
         return number
 
     def equals(self, ph, other):
-        return ph.origin_word == other.origin_word or ph.is_special
+        return ph.word == other.word or ph.is_special
 
 
 class SubformsAnalyzer(ExactAnalyzer):

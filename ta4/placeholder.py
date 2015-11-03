@@ -7,9 +7,6 @@ from . import morph, SPECIAL_WORDS
 
 
 clean_word_regexp = re.compile(ur'^[^\w]*([-\w]+)[^\w]*$', re.U | re.I)
-
-CACHE = {}
-
 PARTS_OF_SPEECH = set([
     u'ADJF',  # имя прилагательное (полное)
     u'ADJS',  # имя прилагательное (краткое)
@@ -31,6 +28,30 @@ PARTS_OF_SPEECH = set([
 ])
 
 IMPORTANT_PARTS_OF_SPEECH = PARTS_OF_SPEECH - set(['NPRO', 'PRED', 'PREP', 'CONJ', 'INTJ', 'PRCL'])
+
+
+class PlaceholderCreator(object):
+    def __init__(self):
+        self.cache = {}
+
+    def get_gram_infos(self, word):
+        # пока так неэлегантно, но увы
+        if word in self.cache:
+            return self.cache[word]
+        if word.startswith(u'лучш'):
+            return [GramInfo(u'лучший', u'ADJF')]
+        elif word == u'дети':
+            return [GramInfo(u'дети', u'NOUN')]
+
+        results = morph.parse(word)
+        self.cache[word] = [GramInfo(r.normal_form, r.tag.POS) for r in results]
+        return self.cache[word]
+
+    def create(self, word, position=0):
+        clear_word = clean_word_regexp.sub(ur'\1', word)
+        gram_infos = self.get_gram_infos(clear_word.lower())
+        is_subform = word.startswith('[') and word.endswith(']')
+        return PlaceHolder(clear_word, position, gram_infos, is_subform)
 
 
 class Marker(object):
@@ -58,19 +79,16 @@ class Marker(object):
 
 
 class PlaceHolder(object):
-    __slots__ = ('word', 'origin_word', 'gram_infos', 'markers', 'position', 'is_subform_word')
+    __slots__ = ('word', 'gram_infos', 'markers', 'position', 'is_subform_word')
 
-    def __init__(self, word, position=0):
-        clear_word = clean_word_regexp.sub(ur'\1', word)
-        self.word = clear_word.upper()
-        self.origin_word = clear_word.upper()
-        self.gram_infos = get_gram_infos(clear_word.lower())
+    def __init__(self, word, position, gram_infos, is_subform):
+        self.word = word.upper()
         self.position = position
+        self.gram_infos = gram_infos
         self.markers = []
-        # этот плейсхолдер - словоформа
-        self.is_subform_word = word.startswith('[') and word.endswith(']')
+        self.is_subform_word = is_subform
 
-    def add_marker(self, position, word, marker_id):
+    def add_marker(self, word, position, marker_id):
         marker = Marker(word, position, marker_id)
         self.markers.append(marker)
 
@@ -79,11 +97,11 @@ class PlaceHolder(object):
 
     @property
     def is_special(self):
-        return self.origin_word in SPECIAL_WORDS
+        return self.word in SPECIAL_WORDS
 
     @property
     def is_word(self):
-        return self.origin_word not in {u'–'}
+        return self.word not in {u'–'}
 
     @property
     def is_important(self):
@@ -109,17 +127,3 @@ class GramInfo(object):
     @property
     def is_important_pos(self):
         return self.part_of_speech in IMPORTANT_PARTS_OF_SPEECH
-
-
-def get_gram_infos(word):
-    # пока так неэлегантно, но увы
-    if word in CACHE:
-        return CACHE[word]
-    if word.startswith(u'лучш'):
-        return [GramInfo(u'лучший', u'ADJF')]
-    elif word == u'дети':
-        return [GramInfo(u'дети', u'NOUN')]
-
-    results = morph.parse(word)
-    results = CACHE[word] = [GramInfo(r.normal_form, r.tag.POS) for r in results]
-    return results

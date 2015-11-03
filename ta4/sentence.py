@@ -1,7 +1,4 @@
 #! coding: utf-8
-from operator import attrgetter
-
-
 class Sentence(object):
     __slots__ = ['text', 'place_holders']
 
@@ -31,11 +28,16 @@ class Sentence(object):
         """
         Если задание по словоформам - вернёт False(например "[пластиковые] [окна]")
         """
-        return not any(map(attrgetter('is_subform_word'), self.place_holders))
+        for p in self.place_holders:
+            if p.is_subform_word:
+                return False
+        return True
 
     @property
     def is_special(self):
-        return any(map(attrgetter('is_special'), self.place_holders))
+        for p in self.place_holders:
+            if p.is_special:
+                return True
 
     def count(self, word):
         return len([ph for ph in self.place_holders if ph.word == word])

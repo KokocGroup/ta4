@@ -5,7 +5,7 @@ import pytest
 
 from ta4 import phrase_cmp
 from ta4.sentence import Sentence
-from ta4.placeholder import PlaceHolder, get_gram_infos
+from ta4.placeholder import PlaceholderCreator
 
 
 @pytest.mark.parametrize("text,length", [
@@ -36,7 +36,7 @@ def test_creation_subform_sentence():
     (u'пластиковые', True, False),
 ])
 def test_lexeme_is_important(word, is_important, is_special):
-    lexeme = PlaceHolder(word)
+    lexeme = PlaceholderCreator().create(word)
     assert lexeme.is_important == is_important
     assert lexeme.is_special == is_special
 
@@ -47,7 +47,7 @@ def test_lexeme_is_important(word, is_important, is_special):
     (u'двигать', 1),
 ])
 def test_get_gram_infos(word, counter):
-    gram_info = get_gram_infos(word)
+    gram_info = PlaceholderCreator().get_gram_infos(word)
     assert len(gram_info) == counter
 
 

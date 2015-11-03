@@ -105,6 +105,7 @@ def get_sentences(text):
     place_holders = []
     sentence = []
     position = 0
+    pc = placeholder.PlaceholderCreator()
     for word_tokens in tokens_generator(diff.tokenize(text)):
         if not word_tokens:
             structure.append([word_tokens, None])
@@ -120,7 +121,7 @@ def get_sentences(text):
 
             last_token = tokens[-1]
             sentence.append(word + last_token.trailing_whitespace)
-            place_holder = placeholder.PlaceHolder(word, position)
+            place_holder = pc.create(word, position)
             place_holders.append(place_holder)
             structure.append([tokens, place_holder])
 
