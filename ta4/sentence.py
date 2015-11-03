@@ -3,12 +3,14 @@ from operator import attrgetter
 
 
 class Sentence(object):
+    __slots__ = ['text', 'place_holders']
+
     def __init__(self, text, placeholders=None):
         self.text = text
         self.place_holders = placeholders or []
         if not self.place_holders:
             from .utils import get_sentences
-            _, sentences = get_sentences(self.text)
+            _, sentences = get_sentences(text)
             self.place_holders = sentences[0].place_holders
 
     def __len__(self):

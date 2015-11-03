@@ -5,11 +5,12 @@ import string
 from lxml.html import diff
 
 from .sentence import Sentence
-from .placeholder import PlaceHolder
+from . import placeholder
 
 SENTENCES_END = u'.?!'
 SENTENCES_END_TAGS = {'</p>', '</li>', '</ul>', '</ol>'}
 SPACE_REGEXP = re.compile('^(\s|&nbsp;)+$', flags=re.I | re.M)
+BEGIN = {u'<br>', u'</br>'}
 
 
 def is_token_end(token):
@@ -18,7 +19,6 @@ def is_token_end(token):
        (token and token[-1] in string.punctuation) or \
        (token.post_tags and token.post_tags[-1][-1] == u' '):
         return True
-
     return False
 
 
@@ -82,54 +82,54 @@ def split_token(word_tokens):
 
 def is_sentence_end(last_token):
     if last_token:
-        last_tags = set(map(unicode.strip, map(unicode, last_token.post_tags)))
-        if (last_token[-1] in SENTENCES_END or
-           last_tags.intersection(SENTENCES_END_TAGS)):
+        if last_token[-1] in SENTENCES_END:
             return True
+        for t in last_token.post_tags:
+            if unicode(t).strip() in SENTENCES_END_TAGS:
+                return True
     return False
 
 
 def is_sentence_begin(first_token):
     if first_token:
-        pre_tags = set(map(unicode.strip, map(unicode, first_token.pre_tags)))
-        if pre_tags.intersection({u'<br>', u'</br>'}):
-            return True
+        for t in first_token.pre_tags:
+            if unicode(t).strip() in BEGIN:
+                return True
     return False
 
 
 def get_sentences(text):
+    placeholder.CACHE = {}
     structure = []
     sentences = []
     place_holders = []
-    sentence = u''
-    tokens = diff.tokenize(text)
+    sentence = []
     position = 0
-    for word_tokens in tokens_generator(tokens):
+    for word_tokens in tokens_generator(diff.tokenize(text)):
         if not word_tokens:
             structure.append([word_tokens, None])
             position += 1
 
         for tokens in split_token(word_tokens):
-            word = u''.join(map(unicode, tokens))
-            word = word.rstrip(SENTENCES_END)
+            word = u''.join(tokens).rstrip(SENTENCES_END)
             first_token = tokens[0]
             if is_sentence_begin(first_token) and place_holders:
-                sentences.append(Sentence(sentence, place_holders))
-                sentence = u''
+                sentences.append(Sentence(u''.join(sentence), place_holders))
+                sentence = []
                 place_holders = []
 
             last_token = tokens[-1]
-            sentence += word + last_token.trailing_whitespace
-            place_holder = PlaceHolder(word, position)
+            sentence.append(word + last_token.trailing_whitespace)
+            place_holder = placeholder.PlaceHolder(word, position)
             place_holders.append(place_holder)
             structure.append([tokens, place_holder])
 
             if is_sentence_end(last_token):
-                sentences.append(Sentence(sentence, place_holders))
-                sentence = u''
+                sentences.append(Sentence(u''.join(sentence), place_holders))
+                sentence = []
                 place_holders = []
             position += 1
     else:
         if sentence:
-            sentences.append(Sentence(sentence, place_holders))
+            sentences.append(Sentence(u''.join(sentence), place_holders))
     return structure, sentences
