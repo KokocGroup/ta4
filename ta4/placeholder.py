@@ -60,7 +60,7 @@ class Marker(object):
 class PlaceHolder(object):
     __slots__ = ('word', 'origin_word', 'gram_infos', 'markers', 'position', 'is_subform_word')
 
-    def __init__(self, word, position):
+    def __init__(self, word, position=0):
         clear_word = clean_word_regexp.sub(ur'\1', word)
         self.word = clear_word.upper()
         self.origin_word = clear_word.upper()
