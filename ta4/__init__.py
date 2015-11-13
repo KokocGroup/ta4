@@ -241,6 +241,7 @@ def merge_filter(markers, original_sentence):
     # Для группы маркеров создаём индексы доступных плейсхолдеров
     minimum = min(map(lambda x: x[1]['min'], markers))
     maximum = max(map(lambda x: x[1]['max'], markers))
+    original_offset = minimum - original_sentence.place_holders[0].position
 
     indexes = range(minimum, maximum+1)
     for (sentence, marker) in markers:
@@ -270,6 +271,7 @@ def merge_filter(markers, original_sentence):
 
     return result, phantoms
 
+
 def _get_phantom(indexes, sentence, offset):
     phantom = []
     indexes = map(lambda x: x+offset, indexes)
@@ -277,7 +279,6 @@ def _get_phantom(indexes, sentence, offset):
         if ph.position in indexes:
             phantom.append(ph.word)
     return ' '.join(phantom)
-
 
 
 def get_intersection(marker, next_marker, sentence):
