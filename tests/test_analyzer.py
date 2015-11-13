@@ -415,6 +415,11 @@ def test_get_marked_words():
         u'купить пластиковые окна в москве',
         [u'пластиковые окна']
     ),
+    (
+        [u'пластиковые окна в москве', u'[окна] [москве] [сегодня]'],
+        u'пластиковые окна в москве сегодня холодно',
+        [u'окна в москве']
+    ),
 ])
 def test_find_phantom_groups(words, text, phantoms):
     words = map(Sentence, words)
