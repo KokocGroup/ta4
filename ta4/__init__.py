@@ -56,7 +56,7 @@ def find_words(words, text):
         markers = get_markers(sentence)
         # группируем маркеры по пересечению
         # в итоге получим кластера, которые хоть как то пересекаются
-        for (markers_chunk, phantoms) in group_markers(markers):
+        for (markers_chunk, phantoms) in group_markers(markers, sentence):
             if len(markers_chunk) == 1:
                 # пересечений по маркерам нет
                 marker_sentence, marker = markers_chunk[0]
@@ -202,7 +202,7 @@ def get_markers(sentence):
     return result
 
 
-def group_markers(markers):
+def group_markers(markers, sentence):
     result = []
     length = len(markers) - 1
     max_pos = 0
@@ -217,18 +217,18 @@ def group_markers(markers):
                 # сортируем по приоритету
                 result = sorted(result, cmp=phrase_cmp, key=itemgetter(0), reverse=True)
                 # отфильтровываем поглащённые
-                result, phantoms = merge_filter(result)
+                result, phantoms = merge_filter(result, sentence)
                 if result:
                     yield result, phantoms
                 max_pos = next_marker['max']
                 result = []
     result = sorted(result, cmp=phrase_cmp, key=itemgetter(0), reverse=True)
-    result, phantoms = merge_filter(result)
+    result, phantoms = merge_filter(result, sentence)
     if result:
         yield result, phantoms
 
 
-def merge_filter(markers):
+def merge_filter(markers, original_sentence):
     """
     Фильтрует маркеры на предмет полного поглощения, так как markers отсортированы по приоритету,
     функция выкинет маркеры, которые полностью поглощаются более приоритетными фразами
@@ -244,7 +244,7 @@ def merge_filter(markers):
 
     indexes = range(minimum, maximum+1)
     for (sentence, marker) in markers:
-        marker_borders = xrange(marker['min'], marker['max']+1)
+        marker_borders = range(marker['min'], marker['max']+1)
         free_elements = map(lambda x: x in indexes, marker_borders)
         # если удалось наложить фразу на плейсхолдеры без конфликтов
         if all(free_elements):
@@ -258,10 +258,10 @@ def merge_filter(markers):
                     if i < length:
                         little_phantoms.append(i)
                 elif little_phantoms:
-                    phantoms.append(' '.join([sentence.place_holders[i].word for i in little_phantoms]))
+                    phantoms.append(_get_phantom(little_phantoms, original_sentence, offset=marker['min']))
                     little_phantoms = []
             if little_phantoms:
-                phantoms.append(' '.join([sentence.place_holders[i].word for i in little_phantoms]))
+                phantoms.append(_get_phantom(little_phantoms, original_sentence, offset=marker['min']))
             result.append((sentence, marker))
 
         for i in marker_borders:
@@ -269,6 +269,15 @@ def merge_filter(markers):
                 indexes.remove(i)
 
     return result, phantoms
+
+def _get_phantom(indexes, sentence, offset):
+    phantom = []
+    indexes = map(lambda x: x+offset, indexes)
+    for ph in sentence:
+        if ph.position in indexes:
+            phantom.append(ph.word)
+    return ' '.join(phantom)
+
 
 
 def get_intersection(marker, next_marker, sentence):
