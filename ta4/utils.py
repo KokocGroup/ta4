@@ -99,7 +99,6 @@ def is_sentence_begin(first_token):
 
 
 def get_sentences(text):
-    placeholder.CACHE = {}
     structure = []
     sentences = []
     place_holders = []
