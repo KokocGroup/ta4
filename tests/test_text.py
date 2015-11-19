@@ -96,3 +96,9 @@ def test_clean_markers():
     mark_with_words([Sentence(u'пластиковые окна')], text)
     counters = get_marked_words(text)
     assert len(counters) == 1
+
+
+def test_span_with_spaces():
+    text = u'<p>t <span> </span>e g</p>'
+    html = TextHtml(text).build_html()
+    assert text == html
