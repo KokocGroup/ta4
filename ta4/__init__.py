@@ -162,6 +162,31 @@ def get_whole_markers(words):
     return groups
 
 
+def absorptions(phrases):
+    u"""
+    Поглощения фраз
+    Каждая фраза должна
+    на вход список фраз/вхождений - [("one phrase", 10), ("phrase", 2)]
+    """
+    phrases = [(Sentence(phrase), count) for phrase, count in phrases]
+    phrases = sorted(phrases, cmp=phrase_cmp, key=itemgetter(0), reverse=True)
+
+    results = []
+    for i, (phrase, count) in enumerate(phrases):
+        for j in range(i+1, len(phrases)):
+            (candidate, cand_count) = phrases[j]
+            if is_contains(phrase, candidate):
+                count -= 1
+        results.append((phrase, count))
+
+    results = [(phrase.text, max([c, 0])) for phrase, c in results]
+    return results
+
+
+def is_contains(haystack, needle):
+    return bool(ExactAnalyzer().mark(needle, haystack, 0, should_mark=False))
+
+
 def activate_marker(marker_sentence, marker, sentence):
     inactive = []
     for placeholder in sentence.place_holders:
@@ -241,7 +266,6 @@ def merge_filter(markers, original_sentence):
     # Для группы маркеров создаём индексы доступных плейсхолдеров
     minimum = min(map(lambda x: x[1]['min'], markers))
     maximum = max(map(lambda x: x[1]['max'], markers))
-    original_offset = minimum - original_sentence.place_holders[0].position
 
     indexes = range(minimum, maximum+1)
     for (sentence, marker) in markers:

@@ -6,7 +6,7 @@ class ExactAnalyzer(object):
     def get_sentence_placeholders(self, sentence):
         return filter(attrgetter('is_word'), sentence.place_holders)
 
-    def mark(self, keyword, sentence, number):
+    def mark(self, keyword, sentence, number, should_mark=True):
         placeholders = self.get_sentence_placeholders(sentence)
         stop = len(placeholders) - len(keyword.place_holders)
         i = 0
@@ -35,10 +35,11 @@ class ExactAnalyzer(object):
                     if not self.equals(ph, placeholders[i+j]):
                         break
             else:
-                words_count = j + skipped_words
-                while words_count >= 0:
-                    placeholders[i-skipped_words+words_count].add_marker(keyword, words_count, number)
-                    words_count -= 1
+                if should_mark:
+                    words_count = j + skipped_words
+                    while words_count >= 0:
+                        placeholders[i-skipped_words+words_count].add_marker(keyword, words_count, number)
+                        words_count -= 1
                 number += 1
             i += 1
         return number
