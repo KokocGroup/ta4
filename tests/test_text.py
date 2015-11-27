@@ -34,7 +34,7 @@ def test_simple_text_in_html_creation():
 
 def test_ignored_selectors():
     html = u'<span class="ice-del">Удалённое предложение. </span><span>А это нормальное затем, следующее предложение</span>'
-    text = TextHtml(html, ignored_selectors=['span.ice-del'])
+    text = TextHtml(html, ignored_tags=[('span', {'cw-tag': 'ice-del'})])
     assert len(text) == 1
     assert text.build_html() == html
 
@@ -64,7 +64,7 @@ def test_build_with_markers():
 def test_build_with_ignored_tags():
     word = Sentence(u'пластиковые окна')
     html = u'<p><h2>купить пластиковые окна в москве</h2></p>'
-    text = TextHtml(html, ignored_selectors=['h2'])
+    text = TextHtml(html, ignored_tags=[('h2', )])
     mark_with_words([word], text)
     assert text.build_html() == html
 

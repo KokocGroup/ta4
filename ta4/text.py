@@ -11,14 +11,20 @@ IGNORED_TAG_TEMPLATE = u'ignored_{}'
 
 
 class TextHtml(object):
-    def __init__(self, html, ignored_selectors=[]):
+    def __init__(self, html, ignored_tags=[]):
+        """Класс для рабоыт с HTML
+
+        Args:
+            html (unicode): HTML
+            ignored_tags (list, optional): Список для исключения тегов в формте BeautifulSoup ('tagname', {'attribute': 'value'})
+        """
         self.bs = BeautifulSoup(self.prepare_html(html), 'html.parser')
         self.text = html
         self.sentences = []
         self.ignored_element_map = {}
 
-        for selector in ignored_selectors:
-            for elem in self.bs.select(selector):
+        for tag in ignored_tags:
+            for elem in self.bs.findAll(*tag):
                 i = len(self.ignored_element_map) + 1
                 tag = Tag(name=IGNORED_TAG_TEMPLATE.format(i))
                 self.ignored_element_map[tag] = elem
