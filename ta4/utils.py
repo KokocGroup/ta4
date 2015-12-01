@@ -2,10 +2,8 @@
 import re
 import string
 
-from lxml.html import diff
-
 from .sentence import Sentence
-from . import placeholder
+from . import placeholder, diff
 
 SENTENCES_END = u'.?!'
 SENTENCES_END_TAGS = {'</p>', '</li>', '</ul>', '</ol>'}
@@ -34,7 +32,8 @@ def tokens_generator(tokens):
         next_one = None
         if i < length:
             next_one = tokens[i+1]
-        if is_token_end(token) or (next_one and '<br>' in next_one.pre_tags) or (next_one and '<nbsp>' in next_one.pre_tags):
+        if (is_token_end(token)
+           or (next_one and '<br>' in next_one.pre_tags)):
             yield result
             result = []
     else:
@@ -99,14 +98,14 @@ def is_sentence_begin(first_token):
 
 
 def get_sentences(text):
-    placeholder.CACHE = {}
     structure = []
     sentences = []
     place_holders = []
     sentence = []
     position = 0
     pc = placeholder.PlaceholderCreator()
-    for word_tokens in tokens_generator(diff.tokenize(text)):
+    tokens = diff.tokenize(text)
+    for word_tokens in tokens_generator(tokens):
         if not word_tokens:
             structure.append([word_tokens, None])
             position += 1

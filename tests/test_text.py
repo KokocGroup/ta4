@@ -96,3 +96,13 @@ def test_clean_markers():
     mark_with_words([Sentence(u'пластиковые окна')], text)
     counters = get_marked_words(text)
     assert len(counters) == 1
+
+
+def test_span_with_spaces():
+    text = u'<p>t <span> </span>e g</p>'
+    html = TextHtml(text).build_html()
+    assert text == html
+
+    text = u"""<p style="text-indent: 20px;">T<span class="ice-ins ice-cts-1" data-changedata="" data-cid="5" data-last-change-time="1447922263562" data-time="1447922263562" data-userid="2" data-username="xsandr"> </span>e<span class="ice-ins ice-cts-1" data-changedata="" data-cid="6" data-last-change-time="1447922263968" data-time="1447922263968" data-userid="2" data-username="xsandr"> </span>s<span class="ice-ins ice-cts-1" data-changedata="" data-cid="7" data-last-change-time="1447922264341" data-time="1447922264341" data-userid="2" data-username="xsandr"> </span>t<span class="ice-ins ice-cts-1" data-changedata="" data-cid="8" data-last-change-time="1447922264695" data-time="1447922264695" data-userid="2" data-username="xsandr"> </span>i<span class="ice-ins ice-cts-1" data-changedata="" data-cid="9" data-last-change-time="1447922265110" data-time="1447922265110" data-userid="2" data-username="xsandr"> </span>n<span class="ice-ins ice-cts-1" data-changedata="" data-cid="10" data-last-change-time="1447922265485" data-time="1447922265485" data-userid="2" data-username="xsandr"> </span>g</p>"""
+    html = TextHtml(text).build_html()
+    assert text == html

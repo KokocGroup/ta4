@@ -72,32 +72,28 @@ def test_mark_multiple_words():
 
 
 def test_merging_markers():
-    origin_sentence = Sentence(u'test1 test2')
     markers = [
         (Sentence(u'test1'), {'min': 0, 'max': 0}),
         (Sentence(u'test1 test2'), {'min': 0, 'max': 1}),
         (Sentence(u'[test1]'), {'min': 0, 'max': 0}),
     ]
-    result, _ = merge_filter(markers, origin_sentence)
+    result, _ = merge_filter(markers, Sentence(u"test1 test2"))
     assert result == markers[:2]
 
-    origin_sentence = Sentence(u'a b c d e f')
     markers = [
-        (Sentence(u'c d e'), {'min': 2, 'max': 4}),
         (Sentence(u'b c d e f'), {'min': 1, 'max': 5}),
-        (Sentence(u'a * c'), {'min': 0, 'max': 2}),
-        (Sentence(u'c d'), {'min': 2, 'max': 3})
+        (Sentence(u'a b c'), {'min': 0, 'max': 2}),
+        (Sentence(u'c d e'), {'min': 2, 'max': 4}),
     ]
-    result, phantoms = merge_filter(markers, origin_sentence)
-    assert phantoms == [u"C D E", u'B C']
-    assert result == markers[:3]
+    result, _ = merge_filter(markers, Sentence(u"a b c d e f g"))
+    assert result == markers[:2]
 
 
 @pytest.mark.parametrize("task,text", [
-    # (
-    #     {u'купить пластиковые окна': 1, u'пластиковые окна в москве': 1},
-    #     u'Купить пластиковые окна, причём недорого. Найти пластиковые окна в москве не так уж и просто.'
-    # ),
+    (
+        {u'купить пластиковые окна': 1, u'пластиковые окна в москве': 1},
+        u'Купить пластиковые окна, причём недорого. Найти пластиковые окна в москве не так уж и просто.'
+    ),
     (
         {u'[купить] [*] [окна]': 1, u'[пластиковые] [окна] [москве]': 1},
         u'Я хочу купить пластиковые окна, причём недорого. Найти пластиковые окна в москве не так уж и просто.'
@@ -396,3 +392,38 @@ def test_get_marked_words():
     marked = get_marked_words(text)
     for word in original_words:
         assert marked[word] == 1
+
+
+@pytest.mark.parametrize("words, text, phantoms", [
+    (
+        [u'купить пластиковые окна', u'пластиковые окна в москве'],
+        u'купить пластиковые окна в москве',
+        [u'пластиковые окна']
+    ),
+    (
+        [u'[купить] [*] [окна]', u'пластиковые окна в москве'],
+        u'купить пластиковые окна в москве',
+        [u'пластиковые окна']
+    ),
+    (
+        [u'[купить] [*] [окна]', u'[пластиковые] [*] [москве]'],
+        u'купить пластиковые окна в москве',
+        [u'пластиковые окна']
+    ),
+    (
+        [u'купить пластиковые окна', u'[пластиковые] [*] [москве]'],
+        u'купить пластиковые окна в москве',
+        [u'пластиковые окна']
+    ),
+    (
+        [u'пластиковые окна в москве', u'[окна] [москве] [сегодня]'],
+        u'пластиковые окна в москве сегодня холодно',
+        [u'окна в москве']
+    ),
+])
+def test_find_phantom_groups(words, text, phantoms):
+    words = map(Sentence, words)
+    text = TextHtml(text)
+    mark_with_words(words, text)
+    _, additional_words = find_words(words, text)
+    assert additional_words.keys() == phantoms

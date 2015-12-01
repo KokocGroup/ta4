@@ -162,6 +162,31 @@ def get_whole_markers(words):
     return groups
 
 
+def absorptions(phrases):
+    u"""
+    Поглощения фраз
+    Каждая фраза должна
+    на вход список фраз/вхождений - [("one phrase", 10), ("phrase", 2)]
+    """
+    phrases = [(Sentence(phrase), count) for phrase, count in phrases]
+    phrases = sorted(phrases, cmp=phrase_cmp, key=itemgetter(0), reverse=True)
+
+    results = []
+    for i, (phrase, count) in enumerate(phrases):
+        for j in range(i+1, len(phrases)):
+            (candidate, cand_count) = phrases[j]
+            if is_contains(phrase, candidate):
+                count -= 1
+        results.append((phrase, count))
+
+    results = [(phrase.text, max([c, 0])) for phrase, c in results]
+    return results
+
+
+def is_contains(haystack, needle):
+    return bool(ExactAnalyzer().mark(needle, haystack, 0, should_mark=False))
+
+
 def activate_marker(marker_sentence, marker, sentence):
     inactive = []
     for placeholder in sentence.place_holders:
@@ -241,11 +266,10 @@ def merge_filter(markers, original_sentence):
     # Для группы маркеров создаём индексы доступных плейсхолдеров
     minimum = min(map(lambda x: x[1]['min'], markers))
     maximum = max(map(lambda x: x[1]['max'], markers))
-    original_offset = minimum - original_sentence.place_holders[0].position
 
     indexes = range(minimum, maximum+1)
     for (sentence, marker) in markers:
-        marker_borders = xrange(marker['min'], marker['max']+1)
+        marker_borders = range(marker['min'], marker['max']+1)
         free_elements = map(lambda x: x in indexes, marker_borders)
         # если удалось наложить фразу на плейсхолдеры без конфликтов
         if all(free_elements):
@@ -253,29 +277,16 @@ def merge_filter(markers, original_sentence):
         elif any(free_elements):
             # удалось наложить частично
             length = len(sentence.place_holders)
-            start_origin_index = marker['min'] - minimum + original_offset
             little_phantoms = []
             for i, value in enumerate(free_elements):
                 if not value:
                     if i < length:
                         little_phantoms.append(i)
                 elif little_phantoms:
-                    phantom_chunks = []
-                    for i in little_phantoms:
-                        for ph in original_sentence.place_holders[start_origin_index + i:]:
-                            if ph.is_important:
-                                phantom_chunks.append(ph.word)
-                                break
-                    phantoms.append(' '.join(phantom_chunks))
+                    phantoms.append(_get_phantom(little_phantoms, original_sentence, offset=marker['min']))
                     little_phantoms = []
             if little_phantoms:
-                phantom_chunks = []
-                for i in little_phantoms:
-                    for ph in original_sentence.place_holders[start_origin_index + i:]:
-                        if ph.is_important:
-                            phantom_chunks.append(ph.word)
-                            break
-                phantoms.append(' '.join(phantom_chunks))
+                phantoms.append(_get_phantom(little_phantoms, original_sentence, offset=marker['min']))
             result.append((sentence, marker))
 
         for i in marker_borders:
@@ -283,6 +294,15 @@ def merge_filter(markers, original_sentence):
                 indexes.remove(i)
 
     return result, phantoms
+
+
+def _get_phantom(indexes, sentence, offset):
+    phantom = []
+    indexes = map(lambda x: x+offset, indexes)
+    for ph in sentence:
+        if ph.position in indexes:
+            phantom.append(ph.word)
+    return ' '.join(phantom)
 
 
 def get_intersection(marker, next_marker, sentence):
