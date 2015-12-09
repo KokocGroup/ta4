@@ -11,6 +11,8 @@ from ta4.placeholder import PlaceholderCreator
 @pytest.mark.parametrize("text,length", [
     (u"Это обычный текст", 3),
     (u"Это обычный - текст", 4),
+    (u"Это обычный<ignored_tag_1></ignored_tag_1> текст", 3),
+    (u"Это обычный <ignored_tag_1></ignored_tag_1>текст", 3)
 ])
 def test_creation(text, length):
     sentence = Sentence(text)
@@ -90,3 +92,4 @@ def test_sorting_phrases():
     assert result_texts[1] == phrases[2]
     assert result_texts[2] == phrases[0]
     assert result_texts[3] == phrases[1]
+
