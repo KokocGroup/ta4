@@ -11,11 +11,12 @@ SPACE_REGEXP = re.compile('^(\s|&nbsp;)+$', flags=re.I | re.M)
 BEGIN = {u'<br>', u'</br>'}
 
 
-def is_token_end(token):
+def is_token_end(token, next_token=None):
     if SPACE_REGEXP.match(token.trailing_whitespace) or \
        token.trailing_whitespace in (u' ', u'\xa0') or \
        (token and token[-1] in string.punctuation) or \
-       (token.post_tags and token.post_tags[-1][-1] == u' '):
+       (token.post_tags and token.post_tags[-1][-1] == u' ') or \
+       (next_token and next_token.pre_tags and next_token.pre_tags[-1][-1] == u' '):
         return True
     return False
 
@@ -32,7 +33,7 @@ def tokens_generator(tokens):
         next_one = None
         if i < length:
             next_one = tokens[i+1]
-        if (is_token_end(token)
+        if (is_token_end(token, next_one)
            or (next_one and '<br>' in next_one.pre_tags)):
             yield result
             result = []
