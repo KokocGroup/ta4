@@ -32,7 +32,8 @@ class ExactAnalyzer(object):
                     if not meaning_word:
                         break
                 else:
-                    if not self.equals(ph, placeholders[i+j]):
+                    index = i+j
+                    if index >= len(placeholders) or not self.equals(ph, placeholders[index]):
                         break
             else:
                 if should_mark:
