@@ -89,15 +89,7 @@ def find_similar_phrases(phrases, text):
     то мы нарезаем это предложение на фразы. Максимальный промежуток между вхождениями
     одно значимое слово
 
-    Например
-    для текста: Я хотел бы купить пластиковые окна в кредит недорого.
-    и ключевых слов: "хотел", "пластиковые окна", "недорого"
-
-    Мы должны сгенерировать дополнительные фразы:
-    "хотел * пластиковые"
-    "хотел * пластиковые окна"
-    "пластиковые окна * недорого"
-    "окна * недорого"
+    `
     """
     words = [Sentence(word.word) for phrase in phrases for word in phrase]
     new_phrases = []
@@ -169,17 +161,17 @@ def absorptions(phrases):
     на вход список фраз/вхождений - [("one phrase", 10), ("phrase", 2)]
     """
     phrases = [(Sentence(phrase), count) for phrase, count in phrases]
-    phrases = sorted(phrases, cmp=phrase_cmp, key=itemgetter(0), reverse=True)
+    phrases = sorted(phrases, cmp=phrase_cmp, key=itemgetter(0), reverse=False)
 
     results = []
     for i, (phrase, count) in enumerate(phrases):
         for j in range(i+1, len(phrases)):
             (candidate, cand_count) = phrases[j]
-            if is_contains(phrase, candidate):
+            if is_contains(candidate, phrase):
                 count -= 1
         results.append((phrase, count))
 
-    results = [(phrase.text, max([c, 0])) for phrase, c in results]
+    results = [(phrase.text, max([c, 0])) for phrase, c in results[::-1]]
     return results
 
 
