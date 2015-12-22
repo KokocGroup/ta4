@@ -157,7 +157,6 @@ def get_whole_markers(words):
 def absorptions(phrases):
     u"""
     Поглощения фраз
-    Каждая фраза должна
     на вход список фраз/вхождений - [("one phrase", 10), ("phrase", 2)]
     """
     phrases = [(Sentence(phrase), count) for phrase, count in phrases]
@@ -167,6 +166,9 @@ def absorptions(phrases):
     for i, (phrase, count) in enumerate(phrases):
         for j in range(i+1, len(phrases)):
             (candidate, cand_count) = phrases[j]
+            # Поглащаются фразы со *, только при одинаковой длинне
+            if phrase.is_special and len(phrase) != len(candidate):
+                continue
             if is_contains(candidate, phrase):
                 count -= 1
         results.append((phrase, count))
