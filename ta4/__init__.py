@@ -169,8 +169,8 @@ def absorptions(phrases):
             # Поглащаются фразы со *, только при одинаковой длинне
             if phrase.is_special and len(phrase) != len(candidate):
                 continue
-            if is_contains(candidate, phrase):
-                count -= 1
+            if is_contains(candidate, phrase) and cand_count > 0:
+                count -= cand_count
         results.append((phrase, count))
 
     results = [(phrase.text, max([c, 0])) for phrase, c in results[::-1]]
