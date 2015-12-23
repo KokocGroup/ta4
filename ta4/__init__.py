@@ -178,7 +178,7 @@ def absorptions(phrases):
 
 
 def is_contains(haystack, needle):
-    return bool(ExactAnalyzer().mark(needle, haystack, 0, should_mark=False))
+    return bool(SubformsAnalyzer().mark(needle, haystack, 0, should_mark=False))
 
 
 def activate_marker(marker_sentence, marker, sentence):
