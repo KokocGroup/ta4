@@ -38,10 +38,12 @@ class PlaceholderCreator(object):
         # пока так неэлегантно, но увы
         if word in self.cache:
             return self.cache[word]
-        if word.startswith(u'лучш'):
+        if word.lower().startswith(u'лучш'):
             return [GramInfo(u'лучший', u'ADJF')]
-        elif word == u'дети':
+        elif word.lower() == u'дети':
             return [GramInfo(u'дети', u'NOUN')]
+        elif word.lower() == u'oled':
+            return [GramInfo(u'oled', 'PRTS')]
 
         results = morph.parse(word)
         self.cache[word] = [GramInfo(r.normal_form, r.tag.POS) for r in results]

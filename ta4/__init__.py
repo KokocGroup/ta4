@@ -2,7 +2,7 @@
 from operator import itemgetter
 from collections import defaultdict, OrderedDict
 from pkg_resources import resource_filename
-
+import math
 import nltk
 import pymorphy2
 
@@ -170,8 +170,8 @@ def absorptions(phrases):
             if phrase.is_special and len(phrase) != len(candidate):
                 continue
             if is_contains(candidate, phrase) and cand_count > 0:
-                count -= cand_count
-        results.append((phrase, count))
+                count -= int(cand_count)
+        results.append((phrase, float(str(count)) if isinstance(count, float) else count))
 
     results = [(phrase.text, max([c, 0])) for phrase, c in results[::-1]]
     return results
