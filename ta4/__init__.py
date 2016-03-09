@@ -159,22 +159,18 @@ def absorptions(phrases):
     Поглощения фраз
     на вход список фраз/вхождений - [("one phrase", 10), ("phrase", 2)]
     """
-    phrases = [(Sentence(phrase), count) for phrase, count in phrases]
-    phrases = sorted(phrases, cmp=phrase_cmp, key=itemgetter(0), reverse=False)
+    phrases = [(Sentence(phrase), float(count)) for phrase, count in phrases]
+    phrases = OrderedDict(sorted(phrases, cmp=phrase_cmp, key=itemgetter(0), reverse=True))
 
-    results = []
-    for i, (phrase, count) in enumerate(phrases):
-        for j in range(i+1, len(phrases)):
-            (candidate, cand_count) = phrases[j]
-            # Поглащаются фразы со *, только при одинаковой длинне
+    for phrase in phrases:
+        for candidate, candidate_count in phrases.items():
+            if phrase == candidate:
+                continue
             if phrase.is_special and len(phrase) != len(candidate):
                 continue
-            if is_contains(candidate, phrase) and cand_count > 0:
-                count -= int(cand_count)
-        results.append((phrase, float(str(count)) if isinstance(count, float) else count))
-
-    results = [(phrase.text, max([c, 0])) for phrase, c in results[::-1]]
-    return results
+            if is_contains(candidate, phrase) and candidate_count > 0:
+                phrases[phrase] -= candidate_count
+    return [(phrase.text, float(str(count))) for phrase, count in phrases.iteritems()]
 
 
 def is_contains(haystack, needle):
