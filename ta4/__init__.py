@@ -169,7 +169,7 @@ def absorptions(phrases):
             if phrase.is_special and len(phrase) != len(candidate):
                 continue
             if is_contains(candidate, phrase) and candidate_count > 0:
-                phrases[phrase] -= candidate_count
+                phrases[phrase] = max((phrases[phrase] - candidate_count, 0))
     return [(phrase.text, float(str(count))) for phrase, count in phrases.iteritems()]
 
 
