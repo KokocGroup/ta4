@@ -44,6 +44,8 @@ class PlaceholderCreator(object):
             return [GramInfo(u'дети', u'NOUN')]
         elif word.lower() == u'oled':
             return [GramInfo(u'oled', 'PRTS')]
+        elif word.lower() == u'м':
+            return [GramInfo(u'метр', 'NOUN')]
 
         results = morph.parse(word)
         self.cache[word] = [GramInfo(r.normal_form, r.tag.POS) for r in results]

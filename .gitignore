@@ -6,3 +6,4 @@
 dist/
 setup.pysetup.py
 .cache/
+.tags*
