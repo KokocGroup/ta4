@@ -83,7 +83,7 @@ class Marker(object):
 
 
 class PlaceHolder(object):
-    __slots__ = ('word', 'gram_infos', 'markers', 'position', 'is_subform_word')
+    __slots__ = ('word', 'gram_infos', 'markers', 'position', 'is_subform_word', '_lexemes')
 
     def __init__(self, word, position, gram_infos, is_subform):
         self.word = word.upper()
@@ -91,6 +91,7 @@ class PlaceHolder(object):
         self.gram_infos = gram_infos
         self.markers = []
         self.is_subform_word = is_subform
+        self._lexemes = None
 
     def add_marker(self, word, position, marker_id):
         marker = Marker(word, position, marker_id)
@@ -119,6 +120,14 @@ class PlaceHolder(object):
 
     def __repr__(self):
         return self.word.encode('utf-8')
+
+    @property
+    def lexemes(self):
+        if not self._lexemes:
+            words = morph.parse(self.word)
+            self._lexemes = list(set(l.word for w in words for l in w.lexeme))
+        return self._lexemes
+
 
 
 class GramInfo(object):

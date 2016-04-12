@@ -1,4 +1,6 @@
 #! coding: utf-8
+import itertools
+
 class Sentence(object):
     __slots__ = ['text', 'place_holders']
 
@@ -45,3 +47,7 @@ class Sentence(object):
     @property
     def exact_count(self):
         return len(filter(lambda x: not x.is_subform_word, self.place_holders))
+
+    @property
+    def lexemes(self):
+        return [u' '.join(lem) for lem in itertools.product(*[ph.lexemes for ph in self.place_holders])]
