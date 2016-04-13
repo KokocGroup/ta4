@@ -83,7 +83,7 @@ class Marker(object):
 
 
 class PlaceHolder(object):
-    __slots__ = ('word', 'gram_infos', 'markers', 'position', 'is_subform_word', '_lexemes')
+    __slots__ = ('word', 'gram_infos', 'markers', 'position', 'is_subform_word', '_lexemes', 'is_word', 'is_special', 'is_important')
 
     def __init__(self, word, position, gram_infos, is_subform):
         self.word = word.upper()
@@ -92,6 +92,12 @@ class PlaceHolder(object):
         self.markers = []
         self.is_subform_word = is_subform
         self._lexemes = None
+        self.is_word = self.word not in {u'–'}
+        self.is_special = self.word in SPECIAL_WORDS
+        if self.is_special:
+            self.is_important = False
+        else:
+            self.is_important = all(map(attrgetter('is_important_pos'), self.gram_infos))
 
     def add_marker(self, word, position, marker_id):
         marker = Marker(word, position, marker_id)
@@ -99,21 +105,6 @@ class PlaceHolder(object):
 
     def clean(self):
         self.markers = []
-
-    @property
-    def is_special(self):
-        return self.word in SPECIAL_WORDS
-
-    @property
-    def is_word(self):
-        return self.word not in {u'–'}
-
-    @property
-    def is_important(self):
-        u"""Не важная часть речи, например предлоги или частицы, не учавствуют в сравнениях"""
-        if self.is_special:
-            return False
-        return all(map(attrgetter('is_important_pos'), self.gram_infos))
 
     def get_all_normal_phorms(self):
         return set(map(attrgetter('normal_form'), self.gram_infos))
@@ -127,7 +118,6 @@ class PlaceHolder(object):
             words = morph.parse(self.word)
             self._lexemes = list(set(l.word for w in words for l in w.lexeme))
         return self._lexemes
-
 
 
 class GramInfo(object):

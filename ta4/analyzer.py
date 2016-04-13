@@ -1,16 +1,16 @@
 #! coding: utf-8
 from operator import attrgetter
 
-
 class ExactAnalyzer(object):
     def get_sentence_placeholders(self, sentence):
         return filter(attrgetter('is_word'), sentence.place_holders)
 
     def mark(self, keyword, sentence, number, should_mark=True):
         placeholders = self.get_sentence_placeholders(sentence)
-        stop = len(placeholders) - len(keyword.place_holders)
+        placeholders_count = len(placeholders)
+        stop = placeholders_count - len(keyword.place_holders)
         i = 0
-        while i < len(placeholders):
+        while i < placeholders_count:
             if i > stop:
                 break
             skipped_words = 0
@@ -22,7 +22,7 @@ class ExactAnalyzer(object):
                         if placeholders[i+j].is_important:
                             meaning_word += 1
                         # если встретили уже второе значимое слово
-                        if meaning_word == 2 or i == len(placeholders) - j - 1:
+                        if meaning_word == 2 or i == placeholders_count - j - 1:
                             i -= 1
                             skipped_words -= 1
                             meaning_word -= 1
@@ -33,7 +33,7 @@ class ExactAnalyzer(object):
                         break
                 else:
                     index = i+j
-                    if index >= len(placeholders) or not self.equals(ph, placeholders[index]):
+                    if index >= placeholders_count or not self.equals(ph, placeholders[index]):
                         break
             else:
                 if should_mark:
