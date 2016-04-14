@@ -217,6 +217,15 @@ def get_markers(sentence):
     return result
 
 
+def get_marker_sentences(text):
+    result = {}
+    for sentence in text:
+        for ph in sentence.place_holders:
+            for marker in ph.markers:
+                result.setdefault(marker.sentence.text, {}).setdefault(marker.id, []).append(ph.word)
+    return {keyword.lower(): map(lambda x: u" ".join(x).lower(), data.values()) for keyword, data in result.iteritems()}
+
+
 def group_markers(markers, sentence):
     result = []
     length = len(markers) - 1
