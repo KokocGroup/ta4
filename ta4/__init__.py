@@ -32,7 +32,7 @@ def mark_with_words(words, text, analyzers={}):
         False: SubformsAnalyzer(),
     }
     number = 1  # скозная нумерация маркеров
-    for word in words:
+    for word in set(words):
         for sentence in text:
             analyzer = analyzers[word.is_exact_task]
             number = analyzer.mark(word, sentence, number)
@@ -88,10 +88,8 @@ def find_similar_phrases(phrases, text):
     Находит похожие фразы. Если в предложении мы встретили какое нибудь слово из фраз,
     то мы нарезаем это предложение на фразы. Максимальный промежуток между вхождениями
     одно значимое слово
-
-    `
     """
-    words = [Sentence(word.word) for phrase in phrases for word in phrase]
+    words = set([Sentence(word.word) for phrase in phrases for word in phrase])
     new_phrases = []
     mark_with_words(words, text)
     for sentence in text:

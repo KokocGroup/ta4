@@ -1,5 +1,6 @@
 #! coding: utf-8
 import itertools
+from hashlib import md5
 
 class Sentence(object):
     __slots__ = ['text', 'place_holders']
@@ -21,6 +22,12 @@ class Sentence(object):
     def __iter__(self):
         for ph in self.place_holders:
             yield ph
+
+    def __eq__(self, other):
+        return isinstance(other, Sentence) and self.__hash__() == other.__hash__()
+
+    def __hash__(self):
+        return int(md5(self.text).hexdigest(), 16)
 
     def __getitem__(self, item):
         return self.place_holders[item]
