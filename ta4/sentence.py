@@ -27,7 +27,7 @@ class Sentence(object):
         return isinstance(other, Sentence) and self.__hash__() == other.__hash__()
 
     def __hash__(self):
-        return int(md5(self.text).hexdigest(), 16)
+        return int(md5(self.text.encode('utf-8')).hexdigest(), 16)
 
     def __getitem__(self, item):
         return self.place_holders[item]
