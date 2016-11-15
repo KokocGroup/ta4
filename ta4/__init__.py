@@ -116,6 +116,8 @@ def find_similar_phrases(phrases, text):
                                 phrase.append(words[x].word)
                             else:
                                 phrase.append(u'*')
+                        if len(set(phrase)) != len(phrase):
+                            continue
                         new_phrases.append(u" ".join(phrase))
     return map(unicode.lower, new_phrases)
 
