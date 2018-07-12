@@ -7,8 +7,9 @@ from . import placeholder, diff
 
 SENTENCES_END = u'.?!'
 SENTENCES_END_TAGS = {'</p>', '</li>', '</ul>', '</ol>'}
-SPACE_REGEXP = re.compile('^(\s|&nbsp;)+$', flags=re.I | re.M)
+SPACE_REGEXP = re.compile('^(\s|&nbsp;)+$', flags=re.I | re.M | re.U)
 BEGIN = {u'<br>', u'</br>'}
+WHITESPACE_TEMPLATE = u"||S||"
 
 
 def is_token_end(token, next_token=None):
@@ -27,14 +28,26 @@ def tokens_generator(tokens):
     """
     result = []
     length = len(tokens) - 1
-
     for i, token in enumerate(tokens):
-        result.append(token)
+        pre_tags = token.pre_tags
+        post_tags = token.post_tags
+        trailing_whitespace = token.trailing_whitespace
+        text = unicode(token)
         next_one = None
         if i < length:
             next_one = tokens[i+1]
-        if (is_token_end(token, next_one)
-           or (next_one and '<br>' in next_one.pre_tags)):
+
+        if text.endswith(WHITESPACE_TEMPLATE):
+            trailing_whitespace = u" "
+
+        if text.startswith(WHITESPACE_TEMPLATE):
+            text = u" " + text.lstrip(WHITESPACE_TEMPLATE)
+
+        new_token = diff.token(text.replace(WHITESPACE_TEMPLATE, " "), pre_tags, post_tags, trailing_whitespace)
+        result.append(new_token)
+
+        if (is_token_end(new_token, next_one)
+                or (next_one and '<br>' in next_one.pre_tags)):
             yield result
             result = []
     else:

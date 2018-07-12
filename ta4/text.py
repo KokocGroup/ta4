@@ -1,10 +1,10 @@
 # coding=utf-8
 from copy import deepcopy
 from operator import attrgetter
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup, Tag, NavigableString
 from lxml.html import diff
 
-from .utils import get_sentences
+from .utils import get_sentences, WHITESPACE_TEMPLATE
 
 
 IGNORED_TAG_TEMPLATE = u'ignored_{}'
@@ -29,6 +29,11 @@ class TextHtml(object):
                 tag = Tag(name=IGNORED_TAG_TEMPLATE.format(i))
                 self.ignored_element_map[tag] = elem
                 elem.replace_with(tag)
+
+        texts = self.bs.findAll(text=True)
+
+        for text in texts:
+            text.replace_with(NavigableString(text.replace(" ", WHITESPACE_TEMPLATE)))
 
         # remove old markers
         for element in self.bs.findAll(attrs={'data-markers': True}):
