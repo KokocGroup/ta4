@@ -303,22 +303,27 @@ def split_words(text):
     if not text.strip():
         return [text]
 
-    words = text.split(WHITESPACE_TEMPLATE)
+
     res = []
 
-    max_index = max([len(words) - 1, 0])
-    prev_word = None
-    last_added_word = None
-    for i, word in enumerate(words):
-        if prev_word is not None and prev_word == u"" and (last_added_word is None or not last_added_word.endswith(" ")):
-            word = u" " + word
-        if word and i < max_index:
-            word = word + u" "
+    if WHITESPACE_TEMPLATE in text:
+        words = text.split(WHITESPACE_TEMPLATE)
+        max_index = max([len(words) - 1, 0])
+        prev_word = None
+        last_added_word = None
+        for i, word in enumerate(words):
+            if prev_word is not None and prev_word == u"" and (last_added_word is None or not last_added_word.endswith(" ")):
+                word = u" " + word
+            if word and i < max_index:
+                word = word + u" "
 
-        if word.strip():
-            res.append(word)
-            last_added_word = word
-        prev_word = word
+            if word.strip():
+                res.append(word)
+                last_added_word = word
+            prev_word = word
+    else:
+        res = split_words_re.findall(text)
+    print res
     return res
 
 start_whitespace_re = re.compile(r'^[ \t\n\r]')
