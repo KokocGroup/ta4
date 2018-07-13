@@ -323,7 +323,6 @@ def split_words(text):
             prev_word = word
     else:
         res = split_words_re.findall(text)
-    print res
     return res
 
 start_whitespace_re = re.compile(r'^[ \t\n\r]')
