@@ -4,7 +4,8 @@ from operator import attrgetter
 from bs4 import BeautifulSoup, Tag, NavigableString
 from lxml.html import diff
 
-from .utils import get_sentences, WHITESPACE_TEMPLATE
+from .utils import get_sentences
+from .diff import WHITESPACE_TEMPLATE
 
 
 IGNORED_TAG_TEMPLATE = u'ignored_{}'

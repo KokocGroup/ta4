@@ -21,6 +21,7 @@ _body_re = re.compile(r'<body.*?>', re.I | re.S)
 _end_body_re = re.compile(r'</body.*?>', re.I | re.S)
 _ins_del_re = re.compile(r'</?(ins|del).*?>', re.I | re.S)
 end_whitespace_re = re.compile(r'[ \t\n\r]$')
+WHITESPACE_TEMPLATE = u"||S||"
 
 
 class token(_unicode):
@@ -302,8 +303,23 @@ def split_words(text):
     if not text.strip():
         return [text]
 
-    words = split_words_re.findall(text)
-    return words
+    words = text.split(WHITESPACE_TEMPLATE)
+    res = []
+
+    max_index = max([len(words) - 1, 0])
+    prev_word = None
+    last_added_word = None
+    for i, word in enumerate(words):
+        if prev_word is not None and prev_word == u"" and (last_added_word is None or not last_added_word.endswith(" ")):
+            word = u" " + word
+        if word and i < max_index:
+            word = word + u" "
+
+        if word.strip():
+            res.append(word)
+            last_added_word = word
+        prev_word = word
+    return res
 
 start_whitespace_re = re.compile(r'^[ \t\n\r]')
 
