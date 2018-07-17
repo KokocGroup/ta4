@@ -19,7 +19,7 @@ def test_html_creation():
     assert len(text) == 1
     assert text.build_html() == html
 
-    html = u"<span>Это обычный текст.Из двух</span> <span>предложений.</span>"
+    html = u"<span>Это обычный текст.Из двух</span><span> предложений.</span>"
     text = TextHtml(html)
     assert len(text) == 2
     assert text.build_html() == html

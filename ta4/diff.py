@@ -303,7 +303,6 @@ def split_words(text):
     if not text.strip():
         return [text]
 
-
     res = []
 
     if WHITESPACE_TEMPLATE in text:
@@ -317,7 +316,7 @@ def split_words(text):
             if word and i < max_index:
                 word = word + u" "
 
-            if word.strip():
+            if word:
                 res.append(word)
                 last_added_word = word
             prev_word = word
