@@ -19,10 +19,19 @@ class ExactAnalyzer(object):
                     # * - пропустить только одно значимое слово(и сколько угодно не значимых)
                     meaning_word = 0
                     while True:
-                        if placeholders[i+j].is_important:
+                        sent_placeholder_index = i + j
+                        is_last_sent_ph = sent_placeholder_index == (placeholders_count - 1)
+                        sent_placeholder = placeholders[sent_placeholder_index]
+                        # Последнее слово в предложении является спец знаком,
+                        # что приводит к рекурсии
+                        if sent_placeholder.is_special and is_last_sent_ph:
+                            break
+                        if sent_placeholder.is_important:
                             meaning_word += 1
                         # если встретили уже второе значимое слово
-                        if meaning_word == 2 or i == placeholders_count - j - 1:
+                        if is_last_sent_ph:
+                            break
+                        elif meaning_word == 2 or i == placeholders_count - j - 1:
                             i -= 1
                             skipped_words -= 1
                             meaning_word -= 1
